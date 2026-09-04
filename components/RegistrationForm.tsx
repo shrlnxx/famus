@@ -84,7 +84,7 @@ const LAGU_OPTIONS = [
 ];
 
 const GAS_ENDPOINT =
-  "https://script.google.com/macros/s/AKfycbzoXRzkeSN-jZdY3ggZDV0JCLMLZJ8Ac-xsu5iNKq4abWV0ELMjb--8QpGDNc9X1dgD/exec";
+  "https://script.google.com/macros/s/AKfycbxRbiAI-Oz-m7EnsusKbmf13LxU_mXClCiht3xt-CZgFQJySFNu4CppJEiH88NAkXnx/exec";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB
 
@@ -324,6 +324,7 @@ export default function RegistrationForm() {
 
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successName, setSuccessName] = useState("");
   const [copiedRek, setCopiedRek] = useState(false);
 
   const cabangLomba = watch("cabangLomba", "");
@@ -331,7 +332,8 @@ export default function RegistrationForm() {
   const isMenyanyi = cabangLomba === "Menyanyi Religi";
   const isCCI = cabangLomba === "CCI";
   const selectedOption = CABANG_OPTIONS.find((o) => o.value === cabangLomba);
-  const isPaid = Boolean(cabangLomba && selectedOption && selectedOption.fee > 0);
+  // All competitions are paid — Bukti Transfer is always required
+  const isPaid = true;
   const selectedLaguObj = LAGU_OPTIONS.find((l) => l.title === selectedLagu);
 
   // Listen for quick-register events from CategoriesSection
@@ -384,21 +386,29 @@ export default function RegistrationForm() {
 
   // Submit Handler
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    // Validate all three files — all are mandatory
     const fotoOk = validateFile(fotoFile, "foto", true);
     const kkOk = validateFile(kkFile, "kk", true);
-    const tfOk = validateFile(tfFile, "tf", isPaid);
+    const tfOk = validateFile(tfFile, "tf", true);
 
     if (!fotoOk || !kkOk || !tfOk) return;
+
+    // Ensure bukti transfer exists (extra guard)
+    if (!tfFile) {
+      setFileErrors((p) => ({ ...p, tf: "Bukti transfer wajib diupload untuk menyelesaikan pendaftaran." }));
+      return;
+    }
 
     setSubmitStatus("loading");
     setErrorMessage("");
 
     try {
-      const [fotoBase64, kkBase64] = await Promise.all([
+      // Convert all three files to Base64 in parallel
+      const [fotoBase64, kkBase64, tfBase64] = await Promise.all([
         convertBase64(fotoFile!),
         convertBase64(kkFile!),
+        convertBase64(tfFile!),
       ]);
-      const tfBase64 = tfFile ? await convertBase64(tfFile) : "";
 
       const namaPesertaFinal = isCCI
         ? `${data.namaPeserta1} & ${data.namaPeserta2}`
@@ -423,26 +433,53 @@ export default function RegistrationForm() {
         kkBase64,
         kkMimeType: kkFile!.type,
         tfBase64,
-        tfMimeType: tfFile?.type ?? "",
+        tfMimeType: tfFile!.type,
       };
 
-      // Google Apps Script requires mode: no-cors (opaque response)
-      await fetch(GAS_ENDPOINT, {
+      // Send to Google Apps Script Web App
+      // Using Content-Type: text/plain to avoid CORS preflight (no OPTIONS request).
+      // GAS deployed as "Anyone" with "Execute as me" will respond with CORS headers
+      // for simple requests. The body is parsed by JSON.parse(e.postData.contents) in doPost.
+      const response = await fetch(GAS_ENDPOINT, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
-        mode: "no-cors",
       });
 
-      setSubmitStatus("success");
-      reset();
-      setFotoFile(null);
-      setKkFile(null);
-      setTfFile(null);
+      // GAS Web Apps redirect (302) with a follow — fetch follows by default.
+      // The final response should be JSON.
+      let result: { success?: boolean; message?: string; data?: Record<string, unknown> };
+      try {
+        result = await response.json();
+      } catch {
+        // If response is not parseable JSON but HTTP status is OK, treat as success
+        if (response.ok || response.type === "opaque") {
+          result = { success: true, message: "Pendaftaran berhasil dikirim." };
+        } else {
+          throw new Error("Gagal memproses respons dari server.");
+        }
+      }
+
+      if (result.success) {
+        setSuccessName(namaPesertaFinal ?? "");
+        setSubmitStatus("success");
+        reset();
+        setFotoFile(null);
+        setKkFile(null);
+        setTfFile(null);
+        setFileErrors({});
+      } else {
+        setSubmitStatus("error");
+        setErrorMessage(
+          result.message || "Pendaftaran gagal diproses oleh server. Silakan coba lagi."
+        );
+      }
     } catch (err) {
-      console.error(err);
       setSubmitStatus("error");
       setErrorMessage(
-        err instanceof Error ? err.message : "Terjadi kesalahan koneksi. Silakan periksa jaringan dan coba lagi."
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan koneksi. Silakan periksa jaringan internet Anda dan coba lagi."
       );
     }
   };
@@ -469,27 +506,49 @@ export default function RegistrationForm() {
 
         {/* --- Success Notification Banner --- */}
         {submitStatus === "success" && (
-          <div className="mb-8 p-6 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="mb-8 p-6 sm:p-8 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm">
             <div className="flex items-start gap-3.5">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-extrabold text-emerald-950 text-base">
-                  Pendaftaran Berhasil Dikirim! 🎉
+              <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-extrabold text-emerald-950 text-lg">
+                  🎉 Pendaftaran Berhasil!
                 </h4>
-                <p className="text-xs sm:text-sm text-emerald-800/90 mt-1 leading-relaxed">
-                  Alhamdulillah, data pendaftaran calon peserta telah kami terima. Panitia akan segera melakukan verifikasi berkas dan menghubungi nomor WhatsApp Anda untuk konfirmasi teknis serta tautan grup peserta.
+                <p className="text-sm text-emerald-800/90 mt-1.5 leading-relaxed">
+                  Pendaftaran FAMUS 2026{successName ? <> atas nama <strong>{successName}</strong></> : ""} berhasil diterima. Data dan dokumen pendaftaran telah berhasil dikirim.
+                </p>
+                <p className="text-xs text-emerald-700/80 mt-2 leading-relaxed">
+                  Panitia akan segera melakukan verifikasi berkas dan menghubungi nomor WhatsApp Anda untuk konfirmasi teknis serta tautan grup peserta.
                 </p>
               </div>
             </div>
-            <a
-              href="https://wa.me/6281234567890"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5 shadow-sm"
-            >
-              <span>Konfirmasi ke Panitia</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitStatus("idle");
+                  setSuccessName("");
+                  setErrorMessage("");
+                  reset();
+                  setFotoFile(null);
+                  setKkFile(null);
+                  setTfFile(null);
+                  setFileErrors({});
+                }}
+                className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
+              >
+                <Send className="w-4 h-4" />
+                <span>Daftar Peserta Lain</span>
+              </button>
+              <a
+                href="https://wa.me/6281234567890"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 text-sm font-bold transition-colors inline-flex items-center justify-center gap-2 border border-emerald-200 shadow-xs"
+              >
+                <span>Konfirmasi ke Panitia</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
         )}
 
@@ -972,14 +1031,14 @@ export default function RegistrationForm() {
                   label="Bukti Transfer"
                   hint="Struk / bukti transfer · PDF / JPG"
                   accept="image/*,.pdf"
-                  required={isPaid}
+                  required
                   disabled={!cabangLomba}
                   file={tfFile}
                   error={fileErrors.tf}
                   accentColor="amber"
                   onChange={(f) => {
                     setTfFile(f);
-                    validateFile(f, "tf", isPaid);
+                    validateFile(f, "tf", true);
                   }}
                 />
               </div>
@@ -1039,7 +1098,7 @@ export default function RegistrationForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  <span>Mengirim Formulir Pendaftaran...</span>
+                  <span>Mengirim pendaftaran & mengupload dokumen...</span>
                 </>
               ) : submitStatus === "success" ? (
                 <>

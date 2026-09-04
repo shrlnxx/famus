@@ -8,6 +8,7 @@ import {
   Volume2,
   Brain,
   ArrowRight,
+  Users,
 } from "lucide-react";
 
 type Category = {
@@ -104,74 +105,87 @@ const categories: Category[] = [
 
 export default function CategoriesSection() {
   return (
-    <section id="lomba" className="py-20 lg:py-28 bg-white">
+    <section id="lomba" className="py-24 lg:py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ── Header ── */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="text-emerald-600 font-bold text-xs uppercase tracking-widest">
+        <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
+          <span className="text-emerald-700 font-bold text-xs uppercase tracking-widest">
             Kompetisi Berkualitas
           </span>
-          <h2 className="mt-2 text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="mt-2 text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-900 tracking-tight">
             Cabang Perlombaan FAMUS 2026
           </h2>
-          <p className="mt-3 text-slate-500 text-base leading-relaxed">
+          <p className="mt-4 text-slate-500 text-sm sm:text-base leading-relaxed">
             Wadah kreasi, minat, dan bakat islami putra-putri berprestasi dengan
             ragam kategori yang disesuaikan dengan tingkat usia.
           </p>
         </div>
 
-        {/* ── 4-Column Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* ── 3-Column Modern Card Grid (Desktop) / 2-Col (Tablet) / 1-Col (Mobile) ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
           {categories.map((cat, i) => {
             const Icon = cat.icon;
             const isFree = cat.fee === 0;
             return (
               <div
                 key={i}
-                className="bg-white/80 backdrop-blur-md border border-white/80 rounded-2xl p-5 shadow-glass flex flex-col justify-between hover:shadow-premium hover:-translate-y-2 hover:bg-white transition-all duration-300 group"
+                className="bg-white rounded-[22px] p-6 sm:p-7 lg:p-8 border border-slate-200/70 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full group"
               >
                 <div>
-                  {/* Top row: icon + badge */}
-                  <div className="flex items-start justify-between gap-2 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition-colors shrink-0">
-                      <Icon className="w-5 h-5" />
+                  {/* Top Row: Icon + Fee & Kuota Badges */}
+                  <div className="flex items-start justify-between gap-3 mb-5">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition-all duration-300 group-hover:scale-105 shrink-0 shadow-sm">
+                      <Icon className="w-6 h-6" />
                     </div>
-                    {/* Kuota & Fee Badges */}
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
-                        Kuota: {cat.kuota}
-                      </span>
+
+                    <div className="flex flex-col items-end gap-1.5">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold leading-none shrink-0 ${
+                        className={`px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wide leading-none ${
                           isFree
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                            : "bg-amber-50 text-amber-800 border border-amber-200/80"
                         }`}
                       >
-                        {isFree ? "Gratis" : "Berbayar (Rp 25.000)"}
+                        {isFree ? "Gratis" : "Rp 25.000"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+                        <Users className="w-3 h-3 text-slate-400" />
+                        {cat.kuota}
                       </span>
                     </div>
                   </div>
 
-                  <h3 className="font-bold text-sm text-slate-900 leading-snug mb-1">
+                  {/* Title */}
+                  <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 leading-snug mb-2 group-hover:text-emerald-800 transition-colors">
                     {cat.title}
                   </h3>
-                  <p className="text-xs font-semibold text-emerald-600 mb-2.5">
-                    {cat.level}
-                  </p>
-                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+
+                  {/* Description */}
+                  <p className="text-sm text-slate-500 leading-relaxed mb-6 line-clamp-3">
                     {cat.desc}
                   </p>
                 </div>
 
-                {/* CTA */}
-                <a
-                  href="#pendaftaran"
-                  className="mt-5 w-full py-2 rounded-xl bg-slate-50 border border-slate-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 text-slate-600 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 group-hover:shadow-sm"
-                >
-                  Pilih Kategori Ini
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </a>
+                <div>
+                  {/* Metadata: Tingkat Usia */}
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs mb-5">
+                    <span className="text-slate-400 font-medium">
+                      Target Peserta:
+                    </span>
+                    <span className="font-bold text-slate-700 bg-slate-100/80 px-2.5 py-1 rounded-md">
+                      {cat.level}
+                    </span>
+                  </div>
+
+                  {/* CTA Button */}
+                  <a
+                    href="#pendaftaran"
+                    className="w-full py-3 rounded-xl bg-slate-50 hover:bg-emerald-700 hover:text-white border border-slate-200/70 text-slate-700 font-bold text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2 group/btn shadow-sm hover:shadow"
+                  >
+                    <span>Daftar Kategori Ini</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </a>
+                </div>
               </div>
             );
           })}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   BookOpen,
   Mic,
@@ -10,15 +13,7 @@ import {
   ArrowRight,
   Users,
 } from "lucide-react";
-
-type Category = {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  level: string;
-  desc: string;
-  fee: number;
-  kuota: string;
-};
+import LombaDetailModal, { Category } from "@/components/LombaDetailModal";
 
 const categories: Category[] = [
   {
@@ -27,7 +22,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Membaca maqra' pilihan dengan tartil, memperhatikan tajwid, fashohah, suara, lagu, dan adab.",
     fee: 25000,
-    kuota: "25 Peserta"
+    kuota: "25 Peserta",
+    formValue: "MTQ",
   },
   {
     icon: Mic,
@@ -35,7 +31,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Membawakan lagu religi pilihan panitia dengan instrumen, dinilai dari kualitas vokal, mimik, dan penampilan.",
     fee: 25000,
-    kuota: "25 Peserta"
+    kuota: "25 Peserta",
+    formValue: "Menyanyi Religi",
   },
   {
     icon: PenTool,
@@ -43,7 +40,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Membawakan karya puisi islami yang belum pernah dilombakan, dinilai dari penghayatan, vokal, dan diksi.",
     fee: 0,
-    kuota: "25 Peserta"
+    kuota: "25 Peserta",
+    formValue: "Puisi Islami",
   },
   {
     icon: MessageSquare,
@@ -51,7 +49,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Menyampaikan pidato tema islami dengan durasi 4-5 menit, wajib menyertakan dalil Al-Qur'an/Hadis.",
     fee: 0,
-    kuota: "25 Putra"
+    kuota: "25 Putra",
+    formValue: "Pidato Putra",
   },
   {
     icon: MessageSquare,
@@ -59,7 +58,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Menyampaikan pidato tema islami dengan durasi 4-5 menit, wajib menyertakan dalil Al-Qur'an/Hadis.",
     fee: 0,
-    kuota: "25 Putri"
+    kuota: "25 Putri",
+    formValue: "Pidato Putri",
   },
   {
     icon: Palette,
@@ -67,7 +67,8 @@ const categories: Category[] = [
     level: "6-9 Tahun",
     desc: "Lomba mewarnai dengan objek yang disediakan. Diperbolehkan menambah objek gambar (tidak masuk penilaian).",
     fee: 0,
-    kuota: "50 Peserta"
+    kuota: "50 Peserta",
+    formValue: "Mewarnai Junior",
   },
   {
     icon: Palette,
@@ -75,7 +76,8 @@ const categories: Category[] = [
     level: "10-12 Tahun",
     desc: "Lomba mewarnai yang mengharuskan peserta menambah objek pada karya untuk masuk dalam penilaian.",
     fee: 0,
-    kuota: "50 Peserta"
+    kuota: "50 Peserta",
+    formValue: "Mewarnai Senior",
   },
   {
     icon: BookMarked,
@@ -83,7 +85,8 @@ const categories: Category[] = [
     level: "6-12 Tahun",
     desc: "Menceritakan kisah fabel atau non-fabel yang mengandung hikmah islami (tanpa membawa teks).",
     fee: 0,
-    kuota: "25 Peserta"
+    kuota: "25 Peserta",
+    formValue: "Storytelling",
   },
   {
     icon: Volume2,
@@ -91,7 +94,8 @@ const categories: Category[] = [
     level: "Khusus Putra",
     desc: "Melantunkan adzan shubuh dengan kebenaran lafadz, suara, dan lagu tanpa mendapat bantuan siapapun.",
     fee: 25000,
-    kuota: "25 Peserta"
+    kuota: "25 Peserta",
+    formValue: "Adzan",
   },
   {
     icon: Brain,
@@ -99,11 +103,25 @@ const categories: Category[] = [
     level: "Tim Beregu (3 Anak)",
     desc: "Lomba beregu 3 anak usia 9-12 tahun, menjawab soal pilihan ganda, isian singkat, dan babak rebutan.",
     fee: 0,
-    kuota: "30 Tim"
+    kuota: "30 Tim",
+    formValue: "CCI",
   },
 ];
 
 export default function CategoriesSection() {
+  const [selectedLomba, setSelectedLomba] = useState<Category | null>(null);
+
+  const handleSelectCategory = (formValue: string) => {
+    setSelectedLomba(null);
+    window.dispatchEvent(
+      new CustomEvent("select-category", { detail: formValue })
+    );
+    const el = document.getElementById("pendaftaran");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section id="lomba" className="py-24 lg:py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -129,7 +147,17 @@ export default function CategoriesSection() {
             return (
               <div
                 key={i}
-                className="bg-white rounded-[22px] p-6 sm:p-7 lg:p-8 border border-slate-200/70 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full group"
+                role="button"
+                tabIndex={0}
+                aria-label={`Buka detail lomba ${cat.title}`}
+                onClick={() => setSelectedLomba(cat)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedLomba(cat);
+                  }
+                }}
+                className="bg-white rounded-[22px] p-6 sm:p-7 lg:p-8 border border-slate-200/70 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.09)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between h-full group cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-emerald-600 select-none"
               >
                 <div>
                   {/* Top Row: Icon + Fee & Kuota Badges */}
@@ -178,19 +206,23 @@ export default function CategoriesSection() {
                   </div>
 
                   {/* CTA Button */}
-                  <a
-                    href="#pendaftaran"
-                    className="w-full py-3 rounded-xl bg-slate-50 hover:bg-emerald-700 hover:text-white border border-slate-200/70 text-slate-700 font-bold text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2 group/btn shadow-sm hover:shadow"
-                  >
-                    <span>Daftar Kategori Ini</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                  </a>
+                  <div className="w-full py-3 rounded-xl bg-slate-50 group-hover:bg-emerald-700 group-hover:text-white border border-slate-200/70 text-slate-700 font-bold text-xs sm:text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-sm">
+                    <span>Lihat Detail</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* ── Interactive Detail Modal ── */}
+      <LombaDetailModal
+        lomba={selectedLomba}
+        onClose={() => setSelectedLomba(null)}
+        onSelectCategory={handleSelectCategory}
+      />
     </section>
   );
 }

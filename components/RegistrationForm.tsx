@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UploadCloud, CheckCircle, Lock, Send, Info } from "lucide-react";
 
 export default function RegistrationForm() {
@@ -13,6 +13,19 @@ export default function RegistrationForm() {
     whatsapp: "",
     category: "",
   });
+
+  useEffect(() => {
+    const handleSelectCategory = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) {
+        setFormData((prev) => ({ ...prev, category: customEvent.detail }));
+      }
+    };
+    window.addEventListener("select-category", handleSelectCategory);
+    return () => {
+      window.removeEventListener("select-category", handleSelectCategory);
+    };
+  }, []);
 
   const [files, setFiles] = useState({
     photo: null as File | null,

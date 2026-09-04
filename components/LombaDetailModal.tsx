@@ -12,6 +12,8 @@ import {
   Wallet,
   ArrowRight,
   ShieldCheck,
+  ExternalLink,
+  Music,
 } from "lucide-react";
 
 export type Category = {
@@ -23,6 +25,15 @@ export type Category = {
   kuota: string;
   formValue: string;
 };
+
+const MENYANYI_SONGS = [
+  { title: "Allahul Kafi", url: "https://youtu.be/78tspwSpey8?si=53gW5-oWnDOltQbf" },
+  { title: "Ahmad Ya Habibi", url: "https://youtu.be/ljmCoVYDwBQ?si=jWJ7V16kv-fWI6oa" },
+  { title: "Sifat Wajib Bagi Allah", url: "https://youtu.be/cJxpyBc_cEs?si=d34Isxra-2kUp6WH" },
+  { title: "Rohatil Athyaru Tasydu", url: "https://youtu.be/f2_sCYyNoIw?si=Dvn8BVw0HllHs0or" },
+  { title: "Ya Thoybah", url: "https://youtu.be/JRuihz53y08?si=DIBkEJ_MX6HCcvE_" },
+  { title: "Sepohon Kayu", url: "https://youtu.be/2CWfyOOgAJQ?si=74NkAfEADNwosZ8s" },
+];
 
 interface LombaDetailModalProps {
   lomba: Category | null;
@@ -81,14 +92,8 @@ export default function LombaDetailModal({
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 text-[11px] font-extrabold uppercase tracking-wide">
                   {lomba.level}
                 </span>
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold leading-none ${
-                    isFree
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-amber-50 text-amber-800 border border-amber-200"
-                  }`}
-                >
-                  {isFree ? "Gratis" : "HTM Rp 25.000"}
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold leading-none bg-amber-50 text-amber-800 border border-amber-200">
+                  HTM Rp {lomba.fee.toLocaleString("id-ID")}
                 </span>
               </div>
               <h2
@@ -139,8 +144,8 @@ export default function LombaDetailModal({
                 <span className="text-[11px] font-bold text-slate-400 uppercase">
                   Biaya
                 </span>
-                <span className="text-xs sm:text-sm font-extrabold text-emerald-700 mt-1">
-                  {isFree ? "Gratis" : "Rp 25.000"}
+                <span className="text-xs sm:text-sm font-extrabold text-amber-700 mt-1">
+                  Rp {lomba.fee.toLocaleString("id-ID")}
                 </span>
               </div>
 
@@ -220,6 +225,65 @@ export default function LombaDetailModal({
             </div>
           </div>
 
+          {/* Pilihan Lagu Wajib (Khusus Menyanyi Religi) */}
+          {lomba.formValue === "Menyanyi Religi" && (
+            <div className="pt-6">
+              <div className="flex items-center gap-2 mb-2.5">
+                <Music className="w-4 h-4 text-emerald-700 shrink-0" />
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                  Daftar 6 Pilihan Lagu Wajib &amp; Referensi YouTube
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                Peserta menyanyikan 1 lagu wajib pilihan. Klik tautan lagu untuk menyimak video referensi iringan &amp; aransemen nada:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {MENYANYI_SONGS.map((song, idx) => (
+                  <a
+                    key={idx}
+                    href={song.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-xl bg-emerald-50/60 hover:bg-emerald-100/70 border border-emerald-200/80 transition-all flex items-center justify-between group shadow-xs"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-emerald-700 text-white text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-900 transition-colors">
+                        {song.title}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-emerald-700 opacity-60 group-hover:opacity-100 transition-opacity shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ketentuan Regu (Khusus CCI) */}
+          {lomba.formValue === "CCI" && (
+            <div className="pt-6">
+              <div className="flex items-center gap-2 mb-2.5">
+                <Users className="w-4 h-4 text-amber-700 shrink-0" />
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                  Ketentuan Tim Regu Cerdas Cermat Islami
+                </h3>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 text-xs sm:text-sm text-amber-900 space-y-1.5 leading-relaxed">
+                <p>
+                  • <strong>Jumlah Anggota:</strong> Satu regu/kelompok terdiri dari <strong>2 peserta santri/siswa</strong> dari sekolah atau lembaga yang sama.
+                </p>
+                <p>
+                  • <strong>Biaya Pendaftaran:</strong> <strong>Rp 60.000 / Tim Regu</strong> (mencakup kedua peserta).
+                </p>
+                <p>
+                  • <strong>Kisi-kisi Soal:</strong> Kisi-kisi materi perlombaan akan dibagikan pada tanggal <strong>15 September 2026</strong> melalui <strong>Grup WhatsApp Peserta</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* 4. Section 🏆 Hadiah & Apresiasi */}
           <div className="pt-6">
             <div className="flex items-center gap-2 mb-3.5">
@@ -237,7 +301,7 @@ export default function LombaDetailModal({
                   Juara I
                 </span>
                 <p className="text-[11px] text-amber-800 font-semibold mt-1">
-                  Trofi Kejuaraan + Piagam Resmi Lembaga + Uang Pembinaan
+                  Trofi Kejuaraan + Piagam Penghargaan + Uang Pembinaan
                 </p>
               </div>
 
@@ -248,7 +312,7 @@ export default function LombaDetailModal({
                   Juara II
                 </span>
                 <p className="text-[11px] text-slate-600 font-medium mt-1">
-                  Trofi Kejuaraan + Piagam Resmi Lembaga + Uang Pembinaan
+                  Trofi Kejuaraan + Piagam Penghargaan + Uang Pembinaan
                 </p>
               </div>
 
@@ -259,7 +323,7 @@ export default function LombaDetailModal({
                   Juara III
                 </span>
                 <p className="text-[11px] text-slate-600 font-medium mt-1">
-                  Trofi Kejuaraan + Piagam Resmi Lembaga + Uang Pembinaan
+                  Trofi Kejuaraan + Piagam Penghargaan + Uang Pembinaan
                 </p>
               </div>
             </div>
@@ -269,8 +333,7 @@ export default function LombaDetailModal({
               <Award className="w-4 h-4 text-emerald-700 shrink-0" />
               <span className="text-xs text-emerald-900 font-medium">
                 Seluruh peserta berhak mendapatkan{" "}
-                <strong>Piagam Kepesertaan Resmi Berpenomoran Lembaga</strong>{" "}
-                dan suvenir edukatif.
+                <strong>Piagam Penghargaan untuk Setiap Peserta</strong>{" "}
               </span>
             </div>
           </div>

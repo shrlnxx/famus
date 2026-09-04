@@ -12,52 +12,53 @@ import {
   Brain,
   ArrowRight,
   Users,
+  FileText,
 } from "lucide-react";
 import LombaDetailModal, { Category } from "@/components/LombaDetailModal";
 
 const categories: Category[] = [
   {
     icon: BookOpen,
-    title: "Musabaqoh Tilawatil Qur'an",
-    level: "6-12 Tahun",
+    title: "Musabaqoh Tartilil Qur'an",
+    level: "6-13 Tahun",
     desc: "Membaca maqra' pilihan dengan tartil, memperhatikan tajwid, fashohah, suara, lagu, dan adab.",
-    fee: 25000,
+    fee: 35000,
     kuota: "25 Peserta",
     formValue: "MTQ",
   },
   {
     icon: Mic,
     title: "Menyanyi Religi",
-    level: "6-12 Tahun",
+    level: "6-13 Tahun",
     desc: "Membawakan lagu religi pilihan panitia dengan instrumen, dinilai dari kualitas vokal, mimik, dan penampilan.",
-    fee: 25000,
+    fee: 35000,
     kuota: "25 Peserta",
     formValue: "Menyanyi Religi",
   },
   {
     icon: PenTool,
     title: "Cipta Baca Puisi Islami",
-    level: "6-12 Tahun",
+    level: "6-13 Tahun",
     desc: "Membawakan karya puisi islami yang belum pernah dilombakan, dinilai dari penghayatan, vokal, dan diksi.",
-    fee: 0,
+    fee: 35000,
     kuota: "25 Peserta",
     formValue: "Puisi Islami",
   },
   {
     icon: MessageSquare,
     title: "Pidato Putra",
-    level: "6-12 Tahun",
+    level: "6-13 Tahun",
     desc: "Menyampaikan pidato tema islami dengan durasi 4-5 menit, wajib menyertakan dalil Al-Qur'an/Hadis.",
-    fee: 0,
+    fee: 35000,
     kuota: "25 Putra",
     formValue: "Pidato Putra",
   },
   {
     icon: MessageSquare,
     title: "Pidato Putri",
-    level: "6-12 Tahun",
+    level: "6-13 Tahun",
     desc: "Menyampaikan pidato tema islami dengan durasi 4-5 menit, wajib menyertakan dalil Al-Qur'an/Hadis.",
-    fee: 0,
+    fee: 35000,
     kuota: "25 Putri",
     formValue: "Pidato Putri",
   },
@@ -66,43 +67,43 @@ const categories: Category[] = [
     title: "Mewarnai Junior",
     level: "6-9 Tahun",
     desc: "Lomba mewarnai dengan objek yang disediakan. Diperbolehkan menambah objek gambar (tidak masuk penilaian).",
-    fee: 0,
+    fee: 30000,
     kuota: "50 Peserta",
     formValue: "Mewarnai Junior",
   },
   {
     icon: Palette,
     title: "Mewarnai Senior",
-    level: "10-12 Tahun",
+    level: "10-13 Tahun",
     desc: "Lomba mewarnai yang mengharuskan peserta menambah objek pada karya untuk masuk dalam penilaian.",
-    fee: 0,
+    fee: 30000,
     kuota: "50 Peserta",
     formValue: "Mewarnai Senior",
   },
   {
     icon: BookMarked,
     title: "Storytelling (Bercerita)",
-    level: "6-12 Tahun",
+    level: "6-13 Tahun",
     desc: "Menceritakan kisah fabel atau non-fabel yang mengandung hikmah islami (tanpa membawa teks).",
-    fee: 0,
+    fee: 35000,
     kuota: "25 Peserta",
     formValue: "Storytelling",
   },
   {
     icon: Volume2,
     title: "Adzan",
-    level: "Khusus Putra",
+    level: "Khusus Putra (6-13 Th)",
     desc: "Melantunkan adzan shubuh dengan kebenaran lafadz, suara, dan lagu tanpa mendapat bantuan siapapun.",
-    fee: 25000,
+    fee: 35000,
     kuota: "25 Peserta",
     formValue: "Adzan",
   },
   {
     icon: Brain,
     title: "Cerdas Cermat Islami",
-    level: "Tim Beregu (3 Anak)",
-    desc: "Lomba beregu 3 anak usia 9-12 tahun, menjawab soal pilihan ganda, isian singkat, dan babak rebutan.",
-    fee: 0,
+    level: "Tim Beregu (2 Anak)",
+    desc: "Lomba beregu 2 anak usia 9-13 tahun, menjawab soal pilihan ganda, isian singkat, dan babak rebutan.",
+    fee: 60000,
     kuota: "30 Tim",
     formValue: "CCI",
   },
@@ -139,14 +140,13 @@ export default function CategoriesSection() {
           </p>
         </div>
 
-        {/* ── 3-Column Modern Card Grid (Desktop) / 2-Col (Tablet) / 1-Col (Mobile) ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
-          {categories.map((cat, i) => {
+        {/* ── Grid Cards ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7 lg:gap-8">
+          {categories.map((cat, idx) => {
             const Icon = cat.icon;
-            const isFree = cat.fee === 0;
             return (
               <div
-                key={i}
+                key={idx}
                 role="button"
                 tabIndex={0}
                 aria-label={`Buka detail lomba ${cat.title}`}
@@ -167,14 +167,8 @@ export default function CategoriesSection() {
                     </div>
 
                     <div className="flex flex-col items-end gap-1.5">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wide leading-none ${
-                          isFree
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                            : "bg-amber-50 text-amber-800 border border-amber-200/80"
-                        }`}
-                      >
-                        {isFree ? "Gratis" : "Rp 25.000"}
+                      <span className="px-3 py-1 rounded-full text-[11px] font-extrabold tracking-wide leading-none bg-amber-50 text-amber-800 border border-amber-200/80">
+                        Rp {cat.fee.toLocaleString("id-ID")}
                       </span>
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                         <Users className="w-3 h-3 text-slate-400" />
@@ -189,9 +183,19 @@ export default function CategoriesSection() {
                   </h3>
 
                   {/* Description */}
-                  <p className="text-sm text-slate-500 leading-relaxed mb-6 line-clamp-3">
+                  <p className="text-sm text-slate-500 leading-relaxed mb-4 line-clamp-3">
                     {cat.desc}
                   </p>
+
+                  {/* Special Note for Cerdas Cermat Islami */}
+                  {cat.formValue === "CCI" && (
+                    <div className="mb-5 p-3 rounded-xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-2 text-xs text-amber-900 leading-relaxed">
+                      <FileText className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Kisi-kisi Soal:</strong> Akan dibagikan pada tanggal <strong>15 September 2026</strong> melalui <strong>Grup WhatsApp Peserta</strong>.
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div>

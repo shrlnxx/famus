@@ -523,7 +523,7 @@ export default function TermsSection() {
                   <div>
                     <p className="font-bold text-sm text-slate-900">Status Peserta</p>
                     <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
-                      Terbuka untuk seluruh anak berusia 6-12 tahun di wilayah se-Malang Raya (individu maupun perwakilan lembaga).
+                      Terbuka untuk seluruh anak berusia 6-13 tahun di wilayah se-Malang Raya (individu maupun perwakilan lembaga).
                     </p>
                   </div>
                 </div>
@@ -558,7 +558,7 @@ export default function TermsSection() {
                   <span>Rekening Resmi Pembayaran HTM</span>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Berlaku untuk cabang MTQ, Menyanyi Religi, dan Adzan (Rp 25.000 / peserta):
+                  Berlaku untuk seluruh cabang perlombaan FAMUS 2026 sesuai ketentuan biaya HTM masing-masing kategori:
                 </p>
 
                 <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">

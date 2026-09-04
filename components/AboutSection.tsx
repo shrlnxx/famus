@@ -19,8 +19,8 @@ const pillars = [
     icon: Gift,
     color: "emerald" as const,
     title: "Fasilitas & Apresiasi Peserta",
-    desc: "Setiap anak berhak merasa dihargai. Seluruh peserta mendapatkan piagam kepesertaan resmi, suvenir edukatif, serta fasilitas ruang tunggu yang nyaman bagi wali.",
-    footer: "Sertifikat Berpenomoran Lembaga",
+    desc: "Setiap anak berhak merasa dihargai. Seluruh peserta mendapatkan piagam penghargaan.",
+    footer: "Piagam Penghargaan",
   },
 ];
 
@@ -58,11 +58,10 @@ export default function AboutSection() {
               >
                 <div>
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-105 ${
-                      isEmerald
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-105 ${isEmerald
                         ? "bg-emerald-600 group-hover:bg-emerald-700 text-white shadow-sm"
                         : "bg-amber-500 group-hover:bg-amber-600 text-white shadow-sm"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
@@ -74,11 +73,10 @@ export default function AboutSection() {
                   </p>
                 </div>
                 <div
-                  className={`pt-4 border-t flex items-center gap-2.5 text-xs sm:text-sm font-semibold ${
-                    isEmerald
+                  className={`pt-4 border-t flex items-center gap-2.5 text-xs sm:text-sm font-semibold ${isEmerald
                       ? "text-emerald-700 border-emerald-100"
                       : "text-amber-700 border-amber-100"
-                  }`}
+                    }`}
                 >
                   <CheckCircle className="w-4 h-4 shrink-0" />
                   <span>{p.footer}</span>

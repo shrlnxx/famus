@@ -46,7 +46,7 @@ const CABANG_OPTIONS = [
   { value: "", label: "Pilih salah satu cabang perlombaan...", disabled: true, fee: 0 },
   { value: "MTQ", label: "Musabaqoh Tartilil Qur'an (MTQ)", fee: 35000 },
   { value: "Menyanyi Religi", label: "Menyanyi Religi", fee: 35000 },
-  { value: "Puisi Islami", label: "Cipta Baca Puisi Islami", fee: 35000 },
+  { value: "Puisi Islami", label: "Baca Puisi Islami", fee: 35000 },
   { value: "Pidato Putra", label: "Pidato Putra", fee: 35000 },
   { value: "Pidato Putri", label: "Pidato Putri", fee: 35000 },
   { value: "Mewarnai Junior", label: "Mewarnai Junior (6–9 Tahun)", fee: 30000 },
@@ -148,9 +148,8 @@ function FileZone({
   return (
     <div className="flex flex-col">
       <div
-        className={`relative group rounded-2xl transition-all ${
-          disabled ? "opacity-40 grayscale pointer-events-none" : ""
-        }`}
+        className={`relative group rounded-2xl transition-all ${disabled ? "opacity-40 grayscale pointer-events-none" : ""
+          }`}
       >
         <input
           ref={inputRef}
@@ -165,9 +164,8 @@ function FileZone({
           }}
         />
         <div
-          className={`p-5 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 transition-all min-h-[135px] ${
-            file ? borderActive : borderIdle
-          } ${error ? "!border-red-400 !bg-red-50/40" : ""}`}
+          className={`p-5 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 transition-all min-h-[135px] ${file ? borderActive : borderIdle
+            } ${error ? "!border-red-400 !bg-red-50/40" : ""}`}
         >
           {file ? (
             <>
@@ -284,17 +282,15 @@ function SectionHeader({
 // --- CSS styles & classes ---
 
 const inputCls = (hasError?: boolean) =>
-  `w-full h-12 px-4 rounded-xl bg-slate-50/70 border ${
-    hasError
-      ? "border-red-400 focus:ring-red-400"
-      : "border-slate-200/90 focus:border-emerald-600 focus:ring-emerald-600/10"
+  `w-full h-12 px-4 rounded-xl bg-slate-50/70 border ${hasError
+    ? "border-red-400 focus:ring-red-400"
+    : "border-slate-200/90 focus:border-emerald-600 focus:ring-emerald-600/10"
   } text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:bg-white transition-all text-sm`;
 
 const selectCls = (hasError?: boolean) =>
-  `w-full h-12 px-4 rounded-xl bg-slate-50/70 border ${
-    hasError
-      ? "border-red-400 focus:ring-red-400"
-      : "border-slate-200/90 focus:border-emerald-600 focus:ring-emerald-600/10"
+  `w-full h-12 px-4 rounded-xl bg-slate-50/70 border ${hasError
+    ? "border-red-400 focus:ring-red-400"
+    : "border-slate-200/90 focus:border-emerald-600 focus:ring-emerald-600/10"
   } text-slate-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer text-sm`;
 
 const chevronStyle = {
@@ -417,8 +413,8 @@ export default function RegistrationForm() {
       const detailKhususFinal = isMenyanyi
         ? (data.laguwajib ?? "")
         : isCCI
-        ? `Regu: ${data.namaKelompok ?? ""} | Peserta 1: ${data.namaPeserta1 ?? ""} | Peserta 2: ${data.namaPeserta2 ?? ""}`
-        : "";
+          ? `Regu: ${data.namaKelompok ?? ""} | Peserta 1: ${data.namaPeserta1 ?? ""} | Peserta 2: ${data.namaPeserta2 ?? ""}`
+          : "";
 
       const payload = {
         cabangLomba: data.cabangLomba,
@@ -804,10 +800,10 @@ export default function RegistrationForm() {
                         cabangLomba === "Mewarnai Junior"
                           ? "Maksimal 9 tahun (Mewarnai Junior)"
                           : cabangLomba === "Mewarnai Senior"
-                          ? "Rentang 10–13 tahun"
-                          : isCCI
-                          ? "Rentang 9–13 tahun"
-                          : "Batas usia: maksimal 13 tahun"
+                            ? "Rentang 10–13 tahun"
+                            : isCCI
+                              ? "Rentang 9–13 tahun"
+                              : "Batas usia: maksimal 13 tahun"
                       }
                     >
                       <input
@@ -921,11 +917,10 @@ export default function RegistrationForm() {
               />
 
               <div
-                className={`rounded-2xl border p-5 sm:p-6 transition-all ${
-                  !cabangLomba
+                className={`rounded-2xl border p-5 sm:p-6 transition-all ${!cabangLomba
                     ? "border-slate-200 bg-slate-50/60"
                     : "border-amber-200/90 bg-amber-50/40"
-                }`}
+                  }`}
               >
                 {!cabangLomba ? (
                   <div className="flex items-center gap-3 py-2 text-slate-500 text-sm justify-center">

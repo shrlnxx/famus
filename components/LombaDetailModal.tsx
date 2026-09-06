@@ -175,7 +175,7 @@ export default function LombaDetailModal({
               <CalendarDays className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>
                 Pelaksanaan: <strong>Ahad, 11 Oktober 2026</strong> • Registrasi
-                Ulang Pukul 07:30 WIB
+                Ulang Pukul 09:00 WIB
               </span>
             </div>
           </div>

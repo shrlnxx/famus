@@ -222,8 +222,7 @@ export default function TermsSection() {
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  Digelar secara hibrida melalui Zoom Meeting &amp; bertempat di Aula Utama Pesantren untuk pengambilan nomor undian tampil.
-                </p>
+                  Digelar secara hibrida melalui Zoom Meeting &amp;                 </p>
               </div>
 
               {/* Status footer */}
@@ -232,7 +231,7 @@ export default function TermsSection() {
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
                   Sesi Hibrida
                 </span>
-                <span className="text-stone-400">Aula &amp; Zoom</span>
+                <span className="text-stone-400">Online</span>
               </div>
             </div>
 
@@ -286,7 +285,7 @@ export default function TermsSection() {
                 {/* Time & Schedule */}
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-900/80 border border-emerald-600/50 text-emerald-100 text-xs font-semibold mb-4">
                   <Clock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                  <span>07:30 WIB – Selesai</span>
+                  <span>09:00 WIB  Selesai</span>
                 </div>
 
                 {/* Description */}
@@ -391,8 +390,7 @@ export default function TermsSection() {
                   </div>
 
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Digelar secara hibrida melalui Zoom Meeting &amp; bertempat di Aula Utama Pesantren untuk pengambilan nomor undian tampil.
-                  </p>
+                    Digelar secara hibrida melalui Zoom Meeting &amp;                   </p>
                 </div>
               </div>
 
@@ -429,7 +427,7 @@ export default function TermsSection() {
 
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-900/80 border border-emerald-600/50 text-emerald-100 text-xs font-semibold mb-2">
                     <Clock className="w-3 h-3 text-amber-300" />
-                    <span>07:30 WIB – Selesai</span>
+                    <span>09:00 WIB – Selesai</span>
                   </div>
 
                   <p className="text-xs text-emerald-100/90 leading-relaxed mb-3">

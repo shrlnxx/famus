@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { School, Scale, Gift, CheckCircle, Quote } from "lucide-react";
 
 const pillars = [
@@ -6,7 +7,7 @@ const pillars = [
     color: "emerald" as const,
     title: "Pendidikan Karakter & Adab",
     desc: "Fokus kami bukan semata-mata trofi kompetisi, melainkan melatih adab, kedisiplinan, dan sportivitas santri sejak dini dalam bingkai nilai-nilai ahlussunnah wal jama'ah.",
-    footer: "Didampingi Asatidz Berpengalaman",
+    footer: "Mendapatkan Pengalaman Berharga",
   },
   {
     icon: Scale,
@@ -39,11 +40,7 @@ export default function AboutSection() {
               Membangun Generasi Qurani Berkarakter Tangguh
             </h2>
           </div>
-          <p className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-sm">
-            Sebuah ikhtiar pendidikan di bawah naungan Pondok Pesantren
-            Salafiyah Shirothul Fuqoha untuk menumbuhkan adab, integritas, dan
-            kecakapan santri cilik nusantara.
-          </p>
+
         </div>
 
         {/* ── 3 Pillars Grid ── */}
@@ -59,8 +56,8 @@ export default function AboutSection() {
                 <div>
                   <div
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-105 ${isEmerald
-                        ? "bg-emerald-600 group-hover:bg-emerald-700 text-white shadow-sm"
-                        : "bg-amber-500 group-hover:bg-amber-600 text-white shadow-sm"
+                      ? "bg-emerald-600 group-hover:bg-emerald-700 text-white shadow-sm"
+                      : "bg-amber-500 group-hover:bg-amber-600 text-white shadow-sm"
                       }`}
                   >
                     <Icon className="w-6 h-6" />
@@ -74,8 +71,8 @@ export default function AboutSection() {
                 </div>
                 <div
                   className={`pt-4 border-t flex items-center gap-2.5 text-xs sm:text-sm font-semibold ${isEmerald
-                      ? "text-emerald-700 border-emerald-100"
-                      : "text-amber-700 border-amber-100"
+                    ? "text-emerald-700 border-emerald-100"
+                    : "text-amber-700 border-amber-100"
                     }`}
                 >
                   <CheckCircle className="w-4 h-4 shrink-0" />
@@ -89,16 +86,22 @@ export default function AboutSection() {
         {/* ── Editorial Quote Card ── */}
         <div className="mt-12 lg:mt-16 bg-white rounded-[24px] p-7 sm:p-9 lg:p-12 border border-slate-200/70 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
           {/* Venue highlight box */}
-          <div className="w-full lg:w-1/3 aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50/50 to-amber-50/40 border border-slate-100 flex flex-col items-center justify-center p-6 text-center shrink-0">
-            <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-3">
-              <span className="text-3xl">🕌</span>
+          <div className="relative w-full lg:w-1/3 aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm group shrink-0">
+            <Image
+              src="/fotopondok.jpg"
+              alt="Pondok Pesantren Salafiyah Shirothul Fuqoha"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 1024px) 100vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/25 to-transparent flex flex-col justify-end p-4 sm:p-5 pointer-events-none">
+              <span className="text-white text-sm font-bold drop-shadow-sm">
+                Pondok Pesantren
+              </span>
+              <span className="text-emerald-200 text-xs font-medium drop-shadow-sm">
+                Salafiyah Shirothul Fuqoha, Sepanjang
+              </span>
             </div>
-            <p className="text-sm font-extrabold text-slate-800">
-              Pondok Pesantren
-            </p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Salafiyah Shirothul Fuqoha, Sepanjang
-            </p>
           </div>
 
           {/* Quote body */}
@@ -111,16 +114,10 @@ export default function AboutSection() {
               bagi putra-putri kita.&rdquo;
             </p>
             <div className="mt-6 sm:mt-8 pt-6 border-t border-slate-100 flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-extrabold text-sm shrink-0 shadow-sm">
-                SF
-              </div>
+
               <div>
-                <p className="font-bold text-sm text-slate-900">
-                  Keluarga Besar Pengasuh
-                </p>
-                <p className="text-xs text-slate-500">
-                  PP Salafiyah Shirothul Fuqoha, Sepanjang
-                </p>
+
+
               </div>
             </div>
           </div>

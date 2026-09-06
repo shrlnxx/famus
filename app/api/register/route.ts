@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     const payload = await req.json();
 
+    // Kirim ke Google Apps Script dengan redirect follow
     const response = await fetch(GAS_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -18,44 +19,81 @@ export async function POST(req: NextRequest) {
 
     const text = await response.text();
 
-    // Detect Google Apps Script HTML error output
-    if (text.includes("TypeError:") || text.includes("<title>Salah</title>") || text.includes("errorMessage")) {
-      // Jika error hanya disebabkan oleh 'setHeaders is not a function' pada baris return 58:
-      // Semua proses penyimpanan data ke spreadsheet/drive di baris 1-57 sudah selesai dieksekusi oleh Google Apps Script.
-      if (text.includes("setHeaders is not a function") || text.includes("setHeaders")) {
-        return NextResponse.json({
-          success: true,
-          message: "Pendaftaran berhasil dikirim.",
-        });
-      }
+    // Log response mentah untuk debugging
+    console.log("[GAS Response] status:", response.status, "body:", text.substring(0, 500));
 
-      const match = text.match(/<div style="text-align:center[^>]*>([^<]+)<\/div>/);
-      const detail = match ? match[1] : "Error internal pada Google Apps Script";
-      
+    // Jika response kosong → kemungkinan timeout/opaque
+    if (!text || text.trim() === "") {
       return NextResponse.json(
         {
           success: false,
-          message: `Error di Google Apps Script: ${detail}`,
+          message:
+            "Server Google Apps Script tidak merespons. Pastikan deployment GAS dipublish sebagai 'Anyone'.",
         },
+        { status: 502 }
+      );
+    }
+
+    // Coba parse sebagai JSON terlebih dahulu
+    let parsed: { success?: boolean; message?: string; data?: unknown } | null = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      // Bukan JSON — akan ditangani di bawah
+    }
+
+    // Jika berhasil parse JSON
+    if (parsed !== null) {
+      if (parsed.success === true) {
+        return NextResponse.json({
+          success: true,
+          message: parsed.message || "Pendaftaran berhasil.",
+          data: parsed.data,
+        });
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            message: parsed.message || "Pendaftaran gagal diproses oleh server.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Jika response adalah HTML error dari GAS
+    if (
+      text.includes("TypeError:") ||
+      text.includes("<title>Salah</title>") ||
+      text.includes("errorMessage") ||
+      text.toLowerCase().includes("exception")
+    ) {
+      const matchPre = text.match(/<pre[^>]*>([^<]{10,500})<\/pre>/);
+      const matchDiv = text.match(/<div style="text-align:center[^>]*>([^<]+)<\/div>/);
+      const detail =
+        matchPre?.[1]?.trim() ||
+        matchDiv?.[1]?.trim() ||
+        "Error internal pada Google Apps Script";
+
+      console.error("[GAS Error HTML]", detail);
+      return NextResponse.json(
+        { success: false, message: `Error di Google Apps Script: ${detail}` },
         { status: 400 }
       );
     }
 
-    try {
-      const data = JSON.parse(text);
-      return NextResponse.json(data);
-    } catch {
-      // If response text is not JSON but request succeeded without error page
-      return NextResponse.json({
-        success: true,
-        message: "Pendaftaran berhasil dikirim.",
-      });
-    }
-  } catch (err: any) {
+    // Respons non-JSON namun tidak mengandung error (plain text OK)
+    return NextResponse.json({
+      success: true,
+      message: "Pendaftaran berhasil dikirim.",
+    });
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("[API /register] Error:", errMsg);
     return NextResponse.json(
       {
         success: false,
-        message: err?.message || "Terjadi kesalahan saat menghubungi server Google Apps Script.",
+        message: errMsg || "Terjadi kesalahan saat menghubungi server Google Apps Script.",
       },
       { status: 500 }
     );

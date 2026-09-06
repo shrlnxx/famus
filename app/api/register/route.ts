@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const GAS_ENDPOINT =
-  "https://script.google.com/macros/s/AKfycbzoXRzkeSN-jZdY3ggZDV0JCLMLZJ8Ac-xsu5iNKq4abWV0ELMjb--8QpGDNc9X1dgD/exec";
+  "https://script.google.com/macros/s/AKfycbxRbiAI-Oz-m7EnsusKbmf13LxU_mXClCiht3xt-CZgFQJySFNu4CppJEiH88NAkXnx/exec";
 
 export const maxDuration = 60; // 60 seconds timeout for file uploads
 

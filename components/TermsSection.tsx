@@ -22,7 +22,7 @@ export default function TermsSection() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("7148829012");
+    navigator.clipboard.writeText("639801016707502");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -147,7 +147,7 @@ export default function TermsSection() {
                 {/* Prominent Date Display */}
                 <div className="bg-stone-50/80 rounded-2xl p-5 border border-stone-100 my-4">
                   <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                    01–30
+                    07–30
                   </div>
                   <div className="text-sm font-extrabold text-emerald-700 tracking-wider uppercase mt-1">
                     SEPTEMBER 2026
@@ -562,13 +562,13 @@ export default function TermsSection() {
                 <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-extrabold text-xs text-emerald-700">
-                      Bank Syariah Indonesia (BSI)
+                      Bank Rakyat Indonesia (BRI)
                     </p>
                     <p className="font-mono font-black text-xl sm:text-2xl text-slate-900 tracking-wider mt-0.5">
-                      714 8829 012
+                      639801016707502
                     </p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      a.n. Panitia FAMUS Sepanjang
+                      a.n. IMAM ABDUL AZIZ
                     </p>
                   </div>
                   <button
@@ -598,7 +598,7 @@ export default function TermsSection() {
                     Pemberitahuan Keamanan
                   </p>
                   <p className="text-xs text-amber-900/80 leading-relaxed mt-0.5">
-                    Harap waspada terhadap segala bentuk penipuan. Konfirmasi pendaftaran dan transaksi hanya melalui rekening resmi BSI di atas dan nomor kontak resmi panitia FAMUS 2026.
+                    Harap waspada terhadap segala bentuk penipuan. Konfirmasi pendaftaran dan transaksi pembayaran hanya melalui rekening resmi BRI di atas dan nomor kontak resmi panitia (Kak Imam / Kak Syavin).
                   </p>
                 </div>
               </div>

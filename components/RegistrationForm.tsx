@@ -381,15 +381,37 @@ export default function RegistrationForm() {
     return () => window.removeEventListener("select-category", handler);
   }, [setValue]);
 
-  // Smooth scroll to top of section on success
-  useEffect(() => {
-    if (isSuccess) {
-      const el = document.getElementById("pendaftaran");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
+  // Smooth scroll to top of pendaftaran section
+  const scrollToSection = () => {
+    if (typeof window === "undefined") return;
+    const el = document.getElementById("pendaftaran");
+    if (el) {
+      const navOffset = 80;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: "smooth",
+      });
     }
-  }, [isSuccess]);
+  };
+
+  // Auto-scroll when status changes to error, loading, or success
+  useEffect(() => {
+    if (submitStatus === "error" || submitStatus === "loading" || isSuccess) {
+      const timer = setTimeout(() => {
+        scrollToSection();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [submitStatus, isSuccess]);
+
+  // Form invalidation callback (when required fields are missing)
+  const onInvalid = () => {
+    setTimeout(() => {
+      scrollToSection();
+    }, 50);
+  };
 
   // Reset form handler for "Daftar Peserta Lain"
   const handleResetForm = () => {
@@ -403,11 +425,14 @@ export default function RegistrationForm() {
     setKkFile(null);
     setTfFile(null);
     setFileErrors({});
+    setTimeout(() => {
+      scrollToSection();
+    }, 50);
   };
 
   // Copy rekening handler with smooth state feedback
   const handleCopyRek = () => {
-    navigator.clipboard.writeText("7148829012");
+    navigator.clipboard.writeText("639801016707502");
     setCopiedRek(true);
     setTimeout(() => setCopiedRek(false), 2500);
   };
@@ -448,16 +473,21 @@ export default function RegistrationForm() {
     const kkOk = validateFile(kkFile, "kk", true);
     const tfOk = validateFile(tfFile, "tf", true);
 
-    if (!fotoOk || !kkOk || !tfOk) return;
+    if (!fotoOk || !kkOk || !tfOk) {
+      scrollToSection();
+      return;
+    }
 
     // Ensure bukti transfer exists (extra guard)
     if (!tfFile) {
       setFileErrors((p) => ({ ...p, tf: "Bukti transfer wajib diupload untuk menyelesaikan pendaftaran." }));
+      scrollToSection();
       return;
     }
 
     setSubmitStatus("loading");
     setErrorMessage("");
+    scrollToSection();
 
     try {
       // Convert all three files to Base64 in parallel
@@ -493,18 +523,24 @@ export default function RegistrationForm() {
         tfMimeType: tfFile!.type,
       };
 
-      // Send to Google Apps Script Web App
-      // Using Content-Type: text/plain to avoid CORS preflight (no OPTIONS request).
-      // GAS deployed as "Anyone" with "Execute as me" will respond with CORS headers
-      // for simple requests. The body is parsed by JSON.parse(e.postData.contents) in doPost.
-      const response = await fetch(GAS_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-      });
+      // Send to server API route proxy first (avoids CORS issues and provides descriptive errors),
+      // with direct fallback to GAS_ENDPOINT.
+      let response: Response;
+      try {
+        response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        // Fallback directly to Google Apps Script endpoint if proxy route is unavailable
+        response = await fetch(GAS_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+        });
+      }
 
-      // GAS Web Apps redirect (302) with a follow — fetch follows by default.
-      // The final response should be JSON.
       let result: { success?: boolean; message?: string; data?: Record<string, unknown> };
       try {
         result = await response.json();
@@ -530,11 +566,14 @@ export default function RegistrationForm() {
       }
     } catch (err) {
       setSubmitStatus("error");
-      setErrorMessage(
-        err instanceof Error
-          ? err.message
-          : "Terjadi kesalahan koneksi. Silakan periksa jaringan internet Anda dan coba lagi."
-      );
+      const rawMsg = err instanceof Error ? err.message : String(err);
+      if (rawMsg.includes("Failed to fetch") || rawMsg.includes("NetworkError")) {
+        setErrorMessage(
+          "Koneksi ke server Google Apps Script gagal (Failed to fetch). Periksa koneksi internet atau cek editor Apps Script Anda (file 'Kode.gs' baris 58: hapus '.setHeaders(...)' yang memicu error)."
+        );
+      } else {
+        setErrorMessage(rawMsg);
+      }
     }
   };
 
@@ -620,12 +659,21 @@ export default function RegistrationForm() {
                   <span>Daftar Peserta Lain</span>
                 </button>
                 <a
-                  href="https://wa.me/6281234567890"
+                  href="https://wa.me/6285641591979"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all shadow-xs"
+                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-all shadow-xs"
                 >
-                  <span>Bantuan Panitia</span>
+                  <span>CP Kak Imam</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+                </a>
+                <a
+                  href="https://wa.me/6285784066403"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                >
+                  <span>CP Kak Syavin</span>
                   <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
                 </a>
               </div>
@@ -667,572 +715,561 @@ export default function RegistrationForm() {
 
             {/* --- Main Card --- */}
             <div className="bg-white rounded-3xl sm:rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-200/80 p-6 sm:p-10 lg:p-14">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 sm:space-y-12" noValidate>
+              <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-10 sm:space-y-12" noValidate>
 
-            {/* ══════════════════════════════════════════════════
+                {/* ══════════════════════════════════════════════════
                 BAGIAN 1 — PILIHAN CABANG LOMBA
             ══════════════════════════════════════════════════ */}
-            <div>
-              <SectionHeader
-                num={1}
-                title="Pilihan Cabang Perlombaan"
-                subtitle="Pilih kategori lomba yang diikuti beserta instrumen yang dibutuhkan"
-              />
+                <div>
+                  <SectionHeader
+                    num={1}
+                    title="Pilihan Cabang Perlombaan"
+                    subtitle="Pilih kategori lomba yang diikuti beserta instrumen yang dibutuhkan"
+                  />
 
-              <div className="space-y-4">
-                <FieldGroup
-                  label="Cabang Perlombaan"
-                  required
-                  error={errors.cabangLomba?.message}
-                >
-                  <select
-                    {...register("cabangLomba", { required: "Silakan pilih salah satu cabang lomba." })}
-                    className={selectCls(!!errors.cabangLomba)}
-                    style={chevronStyle}
-                  >
-                    {CABANG_OPTIONS.map((o) =>
-                      o.disabled ? (
-                        <option key="placeholder" value="" disabled>
-                          {o.label}
-                        </option>
-                      ) : (
-                        <option key={o.value} value={o.value}>
-                          {o.label} — [HTM Rp {o.fee.toLocaleString("id-ID")}]
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldGroup>
-
-                {/* Status Biaya Badge */}
-                {cabangLomba && selectedOption && (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm">
-                    <Info className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span className="text-slate-600">
-                      Biaya Pendaftaran:{" "}
-                      <strong className="text-amber-700 font-extrabold">
-                        Rp {selectedOption.fee.toLocaleString("id-ID")} {isCCI ? "/ Regu (2 Peserta)" : "/ Peserta"}
-                      </strong>
-                    </span>
-                  </div>
-                )}
-
-                {/* Conditional 1: Menyanyi Religi -> Pilihan Lagu Wajib */}
-                {isMenyanyi && (
-                  <div className="rounded-2xl border border-emerald-200/90 bg-emerald-50/50 p-5 space-y-3.5 animate-fade-in mt-2">
+                  <div className="space-y-4">
                     <FieldGroup
-                      label="Pilihan Lagu Wajib"
+                      label="Cabang Perlombaan"
                       required
-                      error={errors.laguwajib?.message}
-                      helper={
-                        <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-medium mt-1">
-                          <ExternalLink className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>Pilih 1 lagu wajib. Tautan YouTube referensi nada &amp; aransemen tersedia di bawah:</span>
-                        </div>
-                      }
+                      error={errors.cabangLomba?.message}
                     >
                       <select
-                        {...register("laguwajib", {
-                          required: isMenyanyi ? "Silakan pilih salah satu lagu wajib." : false,
-                        })}
-                        className={selectCls(!!errors.laguwajib)}
+                        {...register("cabangLomba", { required: "Silakan pilih salah satu cabang lomba." })}
+                        className={selectCls(!!errors.cabangLomba)}
                         style={chevronStyle}
                       >
-                        <option value="" disabled>Pilih judul lagu wajib...</option>
-                        {LAGU_OPTIONS.map((l) => (
-                          <option key={l.title} value={l.title}>{l.title}</option>
-                        ))}
+                        {CABANG_OPTIONS.map((o) =>
+                          o.disabled ? (
+                            <option key="placeholder" value="" disabled>
+                              {o.label}
+                            </option>
+                          ) : (
+                            <option key={o.value} value={o.value}>
+                              {o.label} — [HTM Rp {o.fee.toLocaleString("id-ID")}]
+                            </option>
+                          )
+                        )}
                       </select>
                     </FieldGroup>
 
-                    {/* Selected Song Direct Play Button */}
-                    {selectedLaguObj && (
-                      <div className="p-3 rounded-xl bg-white border border-emerald-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                        <div className="flex items-center gap-2">
-                          <Music className="w-4 h-4 text-emerald-700 shrink-0" />
-                          <span className="text-xs font-bold text-slate-800">
-                            Referensi Terpilih: <strong>{selectedLaguObj.title}</strong>
-                          </span>
-                        </div>
-                        <a
-                          href={selectedLaguObj.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold transition-colors shrink-0 shadow-xs"
-                        >
-                          <span>Putar di YouTube</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                    {/* Status Biaya Badge */}
+                    {cabangLomba && selectedOption && (
+                      <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm">
+                        <Info className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <span className="text-slate-600">
+                          Biaya Pendaftaran:{" "}
+                          <strong className="text-amber-700 font-extrabold">
+                            Rp {selectedOption.fee.toLocaleString("id-ID")} {isCCI ? "/ Regu (2 Peserta)" : "/ Peserta"}
+                          </strong>
+                        </span>
                       </div>
                     )}
 
-                    {/* 6 Song Reference YouTube Links List */}
-                    <div className="pt-2 border-t border-emerald-200/60">
-                      <p className="text-[11px] font-bold text-emerald-900 mb-2">
-                        Daftar Lengkap Tautan YouTube 6 Lagu Wajib:
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {LAGU_OPTIONS.map((song, i) => (
-                          <a
-                            key={i}
-                            href={song.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/90 hover:bg-white border border-emerald-200/80 text-xs text-slate-700 hover:text-emerald-900 transition-colors group shadow-xs"
+                    {/* Conditional 1: Menyanyi Religi -> Pilihan Lagu Wajib */}
+                    {isMenyanyi && (
+                      <div className="rounded-2xl border border-emerald-200/90 bg-emerald-50/50 p-5 space-y-3.5 animate-fade-in mt-2">
+                        <FieldGroup
+                          label="Pilihan Lagu Wajib"
+                          required
+                          error={errors.laguwajib?.message}
+                          helper={
+                            <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-medium mt-1">
+                              <ExternalLink className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>Pilih 1 lagu wajib. Tautan YouTube referensi nada &amp; aransemen tersedia di bawah:</span>
+                            </div>
+                          }
+                        >
+                          <select
+                            {...register("laguwajib", {
+                              required: isMenyanyi ? "Silakan pilih salah satu lagu wajib." : false,
+                            })}
+                            className={selectCls(!!errors.laguwajib)}
+                            style={chevronStyle}
                           >
-                            <span className="font-semibold truncate">{i + 1}. {song.title}</span>
-                            <ExternalLink className="w-3.5 h-3.5 text-emerald-600 opacity-60 group-hover:opacity-100 shrink-0 ml-1.5" />
-                          </a>
-                        ))}
+                            <option value="" disabled>Pilih judul lagu wajib...</option>
+                            {LAGU_OPTIONS.map((l) => (
+                              <option key={l.title} value={l.title}>{l.title}</option>
+                            ))}
+                          </select>
+                        </FieldGroup>
+
+                        {/* Selected Song Direct Play Button */}
+                        {selectedLaguObj && (
+                          <div className="p-3 rounded-xl bg-white border border-emerald-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2">
+                              <Music className="w-4 h-4 text-emerald-700 shrink-0" />
+                              <span className="text-xs font-bold text-slate-800">
+                                Referensi Terpilih: <strong>{selectedLaguObj.title}</strong>
+                              </span>
+                            </div>
+                            <a
+                              href={selectedLaguObj.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold transition-colors shrink-0 shadow-xs"
+                            >
+                              <span>Putar di YouTube</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        )}
+
+                        {/* 6 Song Reference YouTube Links List */}
+                        <div className="pt-2 border-t border-emerald-200/60">
+                          <p className="text-[11px] font-bold text-emerald-900 mb-2">
+                            Daftar Lengkap Tautan YouTube 6 Lagu Wajib:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {LAGU_OPTIONS.map((song, i) => (
+                              <a
+                                key={i}
+                                href={song.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/90 hover:bg-white border border-emerald-200/80 text-xs text-slate-700 hover:text-emerald-900 transition-colors group shadow-xs"
+                              >
+                                <span className="font-semibold truncate">{i + 1}. {song.title}</span>
+                                <ExternalLink className="w-3.5 h-3.5 text-emerald-600 opacity-60 group-hover:opacity-100 shrink-0 ml-1.5" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Conditional 2: CCI -> Info Regu 2 Anak */}
+                    {isCCI && (
+                      <div className="rounded-2xl border border-amber-200/90 bg-amber-50/60 p-5 space-y-2 animate-fade-in mt-2">
+                        <div className="flex items-center gap-2 text-amber-900 font-extrabold text-sm">
+                          <Users className="w-4 h-4 text-amber-700 shrink-0" />
+                          <span>Ketentuan Regu Cerdas Cermat Islami (2 Peserta)</span>
+                        </div>
+                        <p className="text-xs text-amber-800/90 leading-relaxed">
+                          Satu kelompok terdiri dari <strong>2 peserta santri/siswa</strong> dari lembaga atau sekolah yang sama. Biaya pendaftaran adalah <strong>Rp 60.000 / Regu</strong>. Kisi-kisi materi soal akan dibagikan pada tanggal <strong>15 September 2026</strong> melalui <strong>Grup WhatsApp Peserta</strong>.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ══════════════════════════════════════════════════
+                BAGIAN 2 — IDENTITAS CALON PESERTA
+            ══════════════════════════════════════════════════ */}
+                <div>
+                  <SectionHeader
+                    num={2}
+                    title={isCCI ? "Identitas Regu & Anggota Peserta" : "Identitas Calon Peserta"}
+                    subtitle={
+                      isCCI
+                        ? "Data kelompok dan nama lengkap kedua peserta lomba Cerdas Cermat Islami"
+                        : "Data lengkap anak yang akan berlomba di ajang FAMUS 2026"
+                    }
+                  />
+
+                  <div className="space-y-4">
+                    {isCCI ? (
+                      <div className="space-y-4">
+                        <FieldGroup
+                          label="Nama Regu / Kelompok"
+                          required
+                          error={errors.namaKelompok?.message}
+                          helper="Contoh: Regu Al-Khawarizmi / Regu Bilal bin Rabah"
+                        >
+                          <input
+                            type="text"
+                            {...register("namaKelompok", {
+                              required: isCCI ? "Nama regu/kelompok wajib diisi." : false,
+                            })}
+                            placeholder="Contoh: Regu Al-Khawarizmi"
+                            className={inputCls(!!errors.namaKelompok)}
+                          />
+                        </FieldGroup>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FieldGroup
+                            label="Nama Lengkap Peserta 1 (Ketua Regu)"
+                            required
+                            error={errors.namaPeserta1?.message}
+                            helper="Nama lengkap sesuai akta / KK untuk penulisan piagam"
+                          >
+                            <input
+                              type="text"
+                              {...register("namaPeserta1", {
+                                required: isCCI ? "Nama Peserta 1 wajib diisi." : false,
+                                minLength: { value: 3, message: "Minimal 3 karakter." },
+                              })}
+                              placeholder="Contoh: Muhammad Rayhan Al-Fatih"
+                              className={inputCls(!!errors.namaPeserta1)}
+                            />
+                          </FieldGroup>
+
+                          <FieldGroup
+                            label="Nama Lengkap Peserta 2 (Anggota Regu)"
+                            required
+                            error={errors.namaPeserta2?.message}
+                            helper="Nama lengkap sesuai akta / KK untuk penulisan piagam"
+                          >
+                            <input
+                              type="text"
+                              {...register("namaPeserta2", {
+                                required: isCCI ? "Nama Peserta 2 wajib diisi." : false,
+                                minLength: { value: 3, message: "Minimal 3 karakter." },
+                              })}
+                              placeholder="Contoh: Ahmad Zaki Mubarok"
+                              className={inputCls(!!errors.namaPeserta2)}
+                            />
+                          </FieldGroup>
+                        </div>
+                      </div>
+                    ) : (
+                      <FieldGroup
+                        label="Nama Lengkap Anak"
+                        required
+                        error={errors.namaAnak?.message}
+                        helper="Tuliskan nama lengkap beserta ejaan yang tepat untuk pencetakan piagam penghargaan."
+                      >
+                        <input
+                          type="text"
+                          {...register("namaAnak", {
+                            required: !isCCI ? "Nama lengkap anak wajib diisi." : false,
+                            minLength: { value: 3, message: "Nama anak minimal 3 karakter." },
+                          })}
+                          placeholder="Contoh: Muhammad Rayhan Al-Fatih"
+                          className={inputCls(!!errors.namaAnak)}
+                        />
+                      </FieldGroup>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <FieldGroup
+                          label="Usia (Tahun)"
+                          required
+                          error={errors.usia?.message}
+                          helper={
+                            cabangLomba === "Mewarnai Junior"
+                              ? "Maksimal 9 tahun (Mewarnai Junior)"
+                              : cabangLomba === "Mewarnai Senior"
+                                ? "Rentang 10–13 tahun"
+                                : isCCI
+                                  ? "Rentang 9–13 tahun"
+                                  : "Batas usia: maksimal 13 tahun"
+                          }
+                        >
+                          <input
+                            type="number"
+                            min={4}
+                            max={cabangLomba === "Mewarnai Junior" ? 9 : 13}
+                            {...register("usia", {
+                              required: "Usia wajib diisi.",
+                              min: { value: 4, message: "Usia minimal 4 tahun." },
+                              validate: (val) => {
+                                const num = parseInt(val, 10);
+                                if (isNaN(num)) return "Masukkan angka usia yang valid.";
+                                if (cabangLomba === "Mewarnai Junior" && num > 9) {
+                                  return "Batas usia Mewarnai Junior maksimal 9 tahun.";
+                                }
+                                if (num > 13) {
+                                  return "Batas maksimal usia peserta adalah 13 tahun.";
+                                }
+                                return true;
+                              },
+                            })}
+                            placeholder={isCCI ? "Contoh: 10" : "Contoh: 9"}
+                            className={inputCls(!!errors.usia)}
+                          />
+                        </FieldGroup>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <FieldGroup
+                          label="Asal Sekolah / Lembaga / TPQ"
+                          required
+                          error={errors.asalLembaga?.message}
+                          helper="Nama TPQ, Madrasah, SD/MI, atau sekolah asal peserta"
+                        >
+                          <input
+                            type="text"
+                            {...register("asalLembaga", {
+                              required: "Asal sekolah atau lembaga wajib diisi.",
+                            })}
+                            placeholder="Contoh: TPQ Al-Ikhlas Sepanjang / SDIT Permata"
+                            className={inputCls(!!errors.asalLembaga)}
+                          />
+                        </FieldGroup>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
-                {/* Conditional 2: CCI -> Info Regu 2 Anak */}
-                {isCCI && (
-                  <div className="rounded-2xl border border-amber-200/90 bg-amber-50/60 p-5 space-y-2 animate-fade-in mt-2">
-                    <div className="flex items-center gap-2 text-amber-900 font-extrabold text-sm">
-                      <Users className="w-4 h-4 text-amber-700 shrink-0" />
-                      <span>Ketentuan Regu Cerdas Cermat Islami (2 Peserta)</span>
-                    </div>
-                    <p className="text-xs text-amber-800/90 leading-relaxed">
-                      Satu kelompok terdiri dari <strong>2 peserta santri/siswa</strong> dari lembaga atau sekolah yang sama. Biaya pendaftaran adalah <strong>Rp 60.000 / Regu</strong>. Kisi-kisi materi soal akan dibagikan pada tanggal <strong>15 September 2026</strong> melalui <strong>Grup WhatsApp Peserta</strong>.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ══════════════════════════════════════════════════
-                BAGIAN 2 — IDENTITAS CALON PESERTA
+                {/* ══════════════════════════════════════════════════
+                BAGIAN 3 — DATA WALI & NARAHUBUNG
             ══════════════════════════════════════════════════ */}
-            <div>
-              <SectionHeader
-                num={2}
-                title={isCCI ? "Identitas Regu & Anggota Peserta" : "Identitas Calon Peserta"}
-                subtitle={
-                  isCCI
-                    ? "Data kelompok dan nama lengkap kedua peserta lomba Cerdas Cermat Islami"
-                    : "Data lengkap anak yang akan berlomba di ajang FAMUS 2026"
-                }
-              />
+                <div>
+                  <SectionHeader
+                    num={3}
+                    title="Data Pendamping & Narahubung"
+                    subtitle="Kontak orang tua, wali, atau ustadz pembina untuk koordinasi kegiatan"
+                  />
 
-              <div className="space-y-4">
-                {isCCI ? (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FieldGroup
-                      label="Nama Regu / Kelompok"
+                      label="Nama Pendamping (Orang Tua / Wali / Guru)"
                       required
-                      error={errors.namaKelompok?.message}
-                      helper="Contoh: Regu Al-Khawarizmi / Regu Bilal bin Rabah"
+                      error={errors.namaPendamping?.message}
+                      helper="Nama wali peserta atau guru pendamping resmi"
                     >
                       <input
                         type="text"
-                        {...register("namaKelompok", {
-                          required: isCCI ? "Nama regu/kelompok wajib diisi." : false,
+                        {...register("namaPendamping", {
+                          required: "Nama pendamping wajib diisi.",
                         })}
-                        placeholder="Contoh: Regu Al-Khawarizmi"
-                        className={inputCls(!!errors.namaKelompok)}
+                        placeholder="Contoh: Ahmad Baihaqi, S.Pd."
+                        className={inputCls(!!errors.namaPendamping)}
                       />
                     </FieldGroup>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FieldGroup
-                        label="Nama Lengkap Peserta 1 (Ketua Regu)"
-                        required
-                        error={errors.namaPeserta1?.message}
-                        helper="Nama lengkap sesuai akta / KK untuk penulisan piagam"
-                      >
-                        <input
-                          type="text"
-                          {...register("namaPeserta1", {
-                            required: isCCI ? "Nama Peserta 1 wajib diisi." : false,
-                            minLength: { value: 3, message: "Minimal 3 karakter." },
-                          })}
-                          placeholder="Contoh: Muhammad Rayhan Al-Fatih"
-                          className={inputCls(!!errors.namaPeserta1)}
-                        />
-                      </FieldGroup>
-
-                      <FieldGroup
-                        label="Nama Lengkap Peserta 2 (Anggota Regu)"
-                        required
-                        error={errors.namaPeserta2?.message}
-                        helper="Nama lengkap sesuai akta / KK untuk penulisan piagam"
-                      >
-                        <input
-                          type="text"
-                          {...register("namaPeserta2", {
-                            required: isCCI ? "Nama Peserta 2 wajib diisi." : false,
-                            minLength: { value: 3, message: "Minimal 3 karakter." },
-                          })}
-                          placeholder="Contoh: Ahmad Zaki Mubarok"
-                          className={inputCls(!!errors.namaPeserta2)}
-                        />
-                      </FieldGroup>
-                    </div>
-                  </div>
-                ) : (
-                  <FieldGroup
-                    label="Nama Lengkap Anak"
-                    required
-                    error={errors.namaAnak?.message}
-                    helper="Tuliskan nama lengkap beserta ejaan yang tepat untuk pencetakan piagam penghargaan."
-                  >
-                    <input
-                      type="text"
-                      {...register("namaAnak", {
-                        required: !isCCI ? "Nama lengkap anak wajib diisi." : false,
-                        minLength: { value: 3, message: "Nama anak minimal 3 karakter." },
-                      })}
-                      placeholder="Contoh: Muhammad Rayhan Al-Fatih"
-                      className={inputCls(!!errors.namaAnak)}
-                    />
-                  </FieldGroup>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
                     <FieldGroup
-                      label="Usia (Tahun)"
+                      label="Nomor WhatsApp Aktif"
                       required
-                      error={errors.usia?.message}
-                      helper={
-                        cabangLomba === "Mewarnai Junior"
-                          ? "Maksimal 9 tahun (Mewarnai Junior)"
-                          : cabangLomba === "Mewarnai Senior"
-                            ? "Rentang 10–13 tahun"
-                            : isCCI
-                              ? "Rentang 9–13 tahun"
-                              : "Batas usia: maksimal 13 tahun"
-                      }
+                      error={errors.noHp?.message}
+                      helper="Nomor aktif untuk dimasukkan ke grup koordinasi lomba WhatsApp."
                     >
-                      <input
-                        type="number"
-                        min={4}
-                        max={cabangLomba === "Mewarnai Junior" ? 9 : 13}
-                        {...register("usia", {
-                          required: "Usia wajib diisi.",
-                          min: { value: 4, message: "Usia minimal 4 tahun." },
-                          validate: (val) => {
-                            const num = parseInt(val, 10);
-                            if (isNaN(num)) return "Masukkan angka usia yang valid.";
-                            if (cabangLomba === "Mewarnai Junior" && num > 9) {
-                              return "Batas usia Mewarnai Junior maksimal 9 tahun.";
-                            }
-                            if (num > 13) {
-                              return "Batas maksimal usia peserta adalah 13 tahun.";
-                            }
-                            return true;
-                          },
-                        })}
-                        placeholder={isCCI ? "Contoh: 10" : "Contoh: 9"}
-                        className={inputCls(!!errors.usia)}
-                      />
-                    </FieldGroup>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <FieldGroup
-                      label="Asal Sekolah / Lembaga / TPQ"
-                      required
-                      error={errors.asalLembaga?.message}
-                      helper="Nama TPQ, Madrasah, SD/MI, atau sekolah asal peserta"
-                    >
-                      <input
-                        type="text"
-                        {...register("asalLembaga", {
-                          required: "Asal sekolah atau lembaga wajib diisi.",
-                        })}
-                        placeholder="Contoh: TPQ Al-Ikhlas Sepanjang / SDIT Permata"
-                        className={inputCls(!!errors.asalLembaga)}
-                      />
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-sm select-none border-r border-slate-200 pr-2.5">
+                          +62
+                        </span>
+                        <input
+                          type="tel"
+                          {...register("noHp", {
+                            required: "Nomor WhatsApp wajib diisi.",
+                            pattern: {
+                              value: /^[0-9]{8,13}$/,
+                              message: "Masukkan 8–13 digit angka (tanpa awalan 0 atau +62).",
+                            },
+                          })}
+                          placeholder="81234567890"
+                          className={`${inputCls(!!errors.noHp)} pl-16`}
+                        />
+                      </div>
                     </FieldGroup>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* ══════════════════════════════════════════════════
-                BAGIAN 3 — DATA WALI & NARAHUBUNG
-            ══════════════════════════════════════════════════ */}
-            <div>
-              <SectionHeader
-                num={3}
-                title="Data Pendamping & Narahubung"
-                subtitle="Kontak orang tua, wali, atau ustadz pembina untuk koordinasi kegiatan"
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FieldGroup
-                  label="Nama Pendamping (Orang Tua / Wali / Guru)"
-                  required
-                  error={errors.namaPendamping?.message}
-                  helper="Nama wali peserta atau guru pendamping resmi"
-                >
-                  <input
-                    type="text"
-                    {...register("namaPendamping", {
-                      required: "Nama pendamping wajib diisi.",
-                    })}
-                    placeholder="Contoh: Ahmad Baihaqi, S.Pd."
-                    className={inputCls(!!errors.namaPendamping)}
-                  />
-                </FieldGroup>
-
-                <FieldGroup
-                  label="Nomor WhatsApp Aktif"
-                  required
-                  error={errors.noHp?.message}
-                  helper="Nomor aktif untuk dimasukkan ke grup koordinasi lomba WhatsApp."
-                >
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-sm select-none border-r border-slate-200 pr-2.5">
-                      +62
-                    </span>
-                    <input
-                      type="tel"
-                      {...register("noHp", {
-                        required: "Nomor WhatsApp wajib diisi.",
-                        pattern: {
-                          value: /^[0-9]{8,13}$/,
-                          message: "Masukkan 8–13 digit angka (tanpa awalan 0 atau +62).",
-                        },
-                      })}
-                      placeholder="81234567890"
-                      className={`${inputCls(!!errors.noHp)} pl-16`}
-                    />
-                  </div>
-                </FieldGroup>
-              </div>
-            </div>
-
-            {/* ══════════════════════════════════════════════════
+                {/* ══════════════════════════════════════════════════
                 BAGIAN 4 — INFORMASI & PEMBAYARAN HTM
             ══════════════════════════════════════════════════ */}
-            <div>
-              <SectionHeader
-                num={4}
-                title="Informasi & Pembayaran HTM"
-                subtitle="Rincian biaya pendaftaran dan rekening resmi panitia"
-              />
+                <div>
+                  <SectionHeader
+                    num={4}
+                    title="Informasi & Pembayaran HTM"
+                    subtitle="Rincian biaya pendaftaran dan rekening resmi panitia"
+                  />
 
-              <div
-                className={`rounded-2xl border p-5 sm:p-6 transition-all ${!cabangLomba
-                    ? "border-slate-200 bg-slate-50/60"
-                    : "border-amber-200/90 bg-amber-50/40"
-                  }`}
-              >
-                {!cabangLomba ? (
-                  <div className="flex items-center gap-3 py-2 text-slate-500 text-sm justify-center">
-                    <Info className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>Silakan tentukan cabang lomba di Bagian 1 untuk melihat status pembayaran HTM.</span>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-amber-900 font-extrabold text-sm uppercase tracking-wide">
-                      <CreditCard className="w-4 h-4 text-amber-700" />
-                      <span>
-                        Biaya Pendaftaran: Rp {selectedOption?.fee.toLocaleString("id-ID")}{" "}
-                        {isCCI ? "/ Regu (2 Peserta)" : "/ Peserta"}
-                      </span>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      Biaya pendaftaran untuk cabang <strong>{selectedOption?.label ?? cabangLomba}</strong> adalah sebesar <strong>Rp {selectedOption?.fee.toLocaleString("id-ID")}</strong>{isCCI ? " untuk 1 regu (2 peserta)" : ""}. Silakan selesaikan transfer ke rekening panitia di bawah ini, kemudian unggah bukti transfer pada Bagian 5.
-                    </p>
-
-                    {/* Bank Card */}
-                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-amber-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase border border-emerald-200/60 mb-1">
-                          Bank Syariah Indonesia (BSI)
-                        </span>
-                        <p className="font-mono font-black text-2xl text-slate-900 tracking-wider mt-0.5">
-                          714 8829 012
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Atas Nama: <strong className="text-slate-800">Panitia FAMUS Sepanjang</strong>
-                        </p>
+                  <div
+                    className={`rounded-2xl border p-5 sm:p-6 transition-all ${!cabangLomba
+                      ? "border-slate-200 bg-slate-50/60"
+                      : "border-amber-200/90 bg-amber-50/40"
+                      }`}
+                  >
+                    {!cabangLomba ? (
+                      <div className="flex items-center gap-3 py-2 text-slate-500 text-sm justify-center">
+                        <Info className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span>Silakan tentukan cabang lomba di Bagian 1 untuk melihat status pembayaran HTM.</span>
                       </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-amber-900 font-extrabold text-sm uppercase tracking-wide">
+                          <CreditCard className="w-4 h-4 text-amber-700" />
+                          <span>
+                            Biaya Pendaftaran: Rp {selectedOption?.fee.toLocaleString("id-ID")}{" "}
+                            {isCCI ? "/ Regu (2 Peserta)" : "/ Peserta"}
+                          </span>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={handleCopyRek}
-                        className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 text-xs font-bold transition-all border border-slate-200 flex items-center justify-center gap-2 shrink-0 active:scale-95"
-                      >
-                        {copiedRek ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="text-emerald-700">Nomor Rekening Tersalin!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5 text-slate-500" />
-                            <span>Salin No. Rekening</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
+                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                          Biaya pendaftaran untuk cabang <strong>{selectedOption?.label ?? cabangLomba}</strong> adalah sebesar <strong>Rp {selectedOption?.fee.toLocaleString("id-ID")}</strong>{isCCI ? " untuk 1 regu (2 peserta)" : ""}. Silakan selesaikan transfer ke rekening panitia di bawah ini, kemudian unggah bukti transfer pada Bagian 5.
+                        </p>
 
-                    <div className="flex items-center gap-2 text-[11px] text-amber-800/80">
-                      <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                      <span>Pastikan transfer ditujukan ke rekening resmi BSI panitia FAMUS di atas untuk menghindari penipuan.</span>
-                    </div>
+                        {/* Bank Card */}
+                        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-amber-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-extrabold tracking-wider uppercase border border-emerald-200/60 mb-1">
+                              Bank Rakyat Indonesia (BRI)
+                            </span>
+                            <p className="font-mono font-black text-2xl text-slate-900 tracking-wider mt-0.5">
+                              639801016707502
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Atas Nama: <strong className="text-slate-800">IMAM ABDUL AZIZ</strong>
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleCopyRek}
+                            className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 text-xs font-bold transition-all border border-slate-200 flex items-center justify-center gap-2 shrink-0 active:scale-95"
+                          >
+                            {copiedRek ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="text-emerald-700">Nomor Rekening Tersalin!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5 text-slate-500" />
+                                <span>Salin No. Rekening</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-[11px] text-amber-800/80">
+                          <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                          <span>Pastikan transfer ditujukan ke rekening resmi BRI (a.n IMAM ABDUL AZIZ) di atas untuk menghindari penipuan.</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* ══════════════════════════════════════════════════
+                {/* ══════════════════════════════════════════════════
                 BAGIAN 5 — UNGGAH BERKAS PERSYARATAN
             ══════════════════════════════════════════════════ */}
-            <div>
-              <SectionHeader
-                num={5}
-                title="Unggah Berkas Persyaratan"
-                subtitle="Format file: JPG, PNG, atau PDF (maksimal 2 MB per berkas)"
-              />
+                <div>
+                  <SectionHeader
+                    num={5}
+                    title="Unggah Berkas Persyaratan"
+                    subtitle="Format file: JPG, PNG, atau PDF (maksimal 2 MB per berkas)"
+                  />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <FileZone
-                  label={isCCI ? "Pas Foto (Ketua/Anggota)" : "Pas Foto (3×4)"}
-                  hint="Foto setengah badan · JPG / PNG"
-                  accept="image/*"
-                  required
-                  file={fotoFile}
-                  error={fileErrors.foto}
-                  accentColor="emerald"
-                  onChange={(f) => {
-                    setFotoFile(f);
-                    validateFile(f, "foto", true);
-                  }}
-                />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FileZone
+                      label={isCCI ? "Pas Foto (Ketua/Anggota)" : "Pas Foto (3×4)"}
+                      hint="Foto setengah badan · JPG / PNG"
+                      accept="image/*"
+                      required
+                      file={fotoFile}
+                      error={fileErrors.foto}
+                      accentColor="emerald"
+                      onChange={(f) => {
+                        setFotoFile(f);
+                        validateFile(f, "foto", true);
+                      }}
+                    />
 
-                <FileZone
-                  label="Kartu Keluarga (KK)"
-                  hint="Scan/foto KK jelas · PDF / JPG"
-                  accept="image/*,.pdf"
-                  required
-                  file={kkFile}
-                  error={fileErrors.kk}
-                  accentColor="emerald"
-                  onChange={(f) => {
-                    setKkFile(f);
-                    validateFile(f, "kk", true);
-                  }}
-                />
+                    <FileZone
+                      label="Kartu Keluarga (KK)"
+                      hint="Scan/foto KK jelas · PDF / JPG"
+                      accept="image/*,.pdf"
+                      required
+                      file={kkFile}
+                      error={fileErrors.kk}
+                      accentColor="emerald"
+                      onChange={(f) => {
+                        setKkFile(f);
+                        validateFile(f, "kk", true);
+                      }}
+                    />
 
-                <FileZone
-                  label="Bukti Transfer"
-                  hint="Struk / bukti transfer · PDF / JPG"
-                  accept="image/*,.pdf"
-                  required
-                  disabled={!cabangLomba}
-                  file={tfFile}
-                  error={fileErrors.tf}
-                  accentColor="amber"
-                  onChange={(f) => {
-                    setTfFile(f);
-                    validateFile(f, "tf", true);
-                  }}
-                />
-              </div>
-            </div>
+                    <FileZone
+                      label="Bukti Transfer"
+                      hint="Struk / bukti transfer · PDF / JPG"
+                      accept="image/*,.pdf"
+                      required
+                      disabled={!cabangLomba}
+                      file={tfFile}
+                      error={fileErrors.tf}
+                      accentColor="amber"
+                      onChange={(f) => {
+                        setTfFile(f);
+                        validateFile(f, "tf", true);
+                      }}
+                    />
+                  </div>
+                </div>
 
-            {/* ══════════════════════════════════════════════════
+                {/* ══════════════════════════════════════════════════
                 PERNYATAAN & PERSETUJUAN
             ══════════════════════════════════════════════════ */}
-            <div className="space-y-2">
-              <label className="flex items-start gap-3.5 p-5 bg-slate-50 rounded-2xl border border-slate-200/80 cursor-pointer hover:bg-slate-100/70 transition-colors">
-                <input
-                  type="checkbox"
-                  {...register("agreement", {
-                    required: "Anda wajib menyetujui pernyataan ini sebelum mengirim pendaftaran.",
-                  })}
-                  className="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer shrink-0"
-                />
-                <span className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                  Saya menyatakan dengan sadar bahwa seluruh data yang diisikan adalah benar, akurat, dan dapat dipertanggungjawabkan. Kami bersedia menaati petunjuk teknis lomba, tata tertib santri, serta menerima keputusan dewan juri <strong className="text-slate-900 font-bold">FAMUS 2026</strong>.
-                </span>
-              </label>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-3.5 p-5 bg-slate-50 rounded-2xl border border-slate-200/80 cursor-pointer hover:bg-slate-100/70 transition-colors">
+                    <input
+                      type="checkbox"
+                      {...register("agreement", {
+                        required: "Anda wajib menyetujui pernyataan ini sebelum mengirim pendaftaran.",
+                      })}
+                      className="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                      Saya menyatakan dengan sadar bahwa seluruh data yang diisikan adalah benar, akurat, dan dapat dipertanggungjawabkan. Kami bersedia menaati petunjuk teknis lomba, tata tertib santri, serta menerima keputusan dewan juri <strong className="text-slate-900 font-bold">FAMUS 2026</strong>.
+                    </span>
+                  </label>
 
-              {errors.agreement && (
-                <p className="text-[11px] text-red-600 font-medium flex items-center gap-1 pl-1">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.agreement.message}
-                </p>
-              )}
-            </div>
+                  {errors.agreement && (
+                    <p className="text-[11px] text-red-600 font-medium flex items-center gap-1 pl-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.agreement.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* ══════════════════════════════════════════════════
+                {/* ══════════════════════════════════════════════════
                 TOMBOL KIRIM PENDAFTARAN
             ══════════════════════════════════════════════════ */}
-            <button
-              type="submit"
-              disabled={isSubmitting || submitStatus === "success"}
-              className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base sm:text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  <span>Mengirim pendaftaran & mengupload dokumen...</span>
-                </>
-              ) : submitStatus === "success" ? (
-                <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span>Pendaftaran Terkirim!</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  <span>Kirim Formulir Pendaftaran</span>
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || submitStatus === "success"}
+                  className="w-full py-4 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-base sm:text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      <span>Mengirim pendaftaran & mengupload dokumen...</span>
+                    </>
+                  ) : submitStatus === "success" ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Pendaftaran Terkirim!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>Kirim Formulir Pendaftaran</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
 
-        {/* --- Footer Notes & Narahubung --- */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-3 text-xs font-medium text-slate-500">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-emerald-700 shrink-0" />
-            <span>Data pendaftar terenkripsi & hanya digunakan untuk administrasi resmi panitia FAMUS 2026.</span>
-          </div>
-          <div>
-            Butuh bantuan? Hubungi Narahubung:{" "}
-            <a
-              href="https://wa.me/6281234567890"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-emerald-700 hover:underline inline-flex items-center gap-1"
-            >
-              +62 812-3456-7890
-            </a>
-          </div>
-        </div>
-      </>
-    )}
-  </div>
-</section>
+            {/* --- Footer Notes & Narahubung --- */}
+            <div className="mt-8 flex flex-col lg:flex-row items-center justify-between gap-4 px-3 text-xs font-medium text-slate-500">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Data pendaftar terenkripsi & hanya digunakan untuk administrasi resmi panitia FAMUS 2026.</span>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 }

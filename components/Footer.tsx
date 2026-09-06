@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Youtube, Mail, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -25,13 +25,26 @@ export default function Footer() {
               2026. Diselenggarakan oleh Pondok Pesantren Salafiyah Shirothul
               Fuqoha.
             </p>
-            <a
-              href="https://wa.me/6281234567890"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-900 border border-emerald-800/80 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>WhatsApp Panitia</span>
-            </a>
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://wa.me/6285641591979"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-900 border border-emerald-800/80 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Kak Imam: 0856-4159-1979</span>
+              </a>
+              <a
+                href="https://wa.me/6285784066403"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-900 border border-emerald-800/80 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Kak Syavin: 0857-8406-6403</span>
+              </a>
+            </div>
           </div>
 
           {/* 2. Navigation */}
@@ -127,18 +140,47 @@ export default function Footer() {
                 <span className="block font-bold text-white mb-0.5">
                   PP Salafiyah Shirothul Fuqoha
                 </span>
-                Jl. Raya Sepanjang No. 99, Kec. Gondanglegi, Kab. Malang, Jawa
-                Timur
+                Jl. Basuki Rahmat No. 104 Desa Sepanjang, Kec. Gondanglegi, Kab. Malang, Jawa Timur
               </p>
             </div>
-            <div className="flex items-start gap-3 text-sm text-emerald-100/80">
+            <div className="flex items-start gap-3 text-sm text-emerald-100/80 mb-4">
               <Mail className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
                 <span className="block font-bold text-white mb-0.5">
-                  Surel Resmi
+                  Email
                 </span>
-                panitia@famus2026.com
+                munadzomahsantrishifa26.27@gmail.com
               </p>
+            </div>
+            <div className="flex items-start gap-3 text-sm text-emerald-100/80">
+              <Phone className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="block font-bold text-white mb-0.5">
+                  Narahubung / CP
+                </span>
+                <p>
+                  Kak Imam:{" "}
+                  <a
+                    href="https://wa.me/6285641591979"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white underline font-medium"
+                  >
+                    0856-4159-1979
+                  </a>
+                </p>
+                <p className="mt-0.5">
+                  Kak Syavin:{" "}
+                  <a
+                    href="https://wa.me/6285784066403"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white underline font-medium"
+                  >
+                    0857-8406-6403
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -146,7 +188,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-emerald-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-emerald-300/70 text-center md:text-left">
           <p>
-            &copy; {new Date().getFullYear()} Panitia FAMUS. Hak Cipta
+            &copy; {new Date().getFullYear()} Munadzomah santri Shifa. Hak Cipta
             Dilindungi.
           </p>
           <div className="flex gap-6">

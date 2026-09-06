@@ -39,7 +39,7 @@ const categories: Category[] = [
     icon: PenTool,
     title: "Baca Puisi Islami",
     level: "6-13 Tahun",
-    desc: "Membawakan karya puisi islami yang belum pernah dilombakan, dinilai dari penghayatan, vokal, dan diksi.",
+    desc: "Membawakan karya puisi islami ciptaan sendiri atau ciptaan orang lain dengan pilihan tema berikut: 1. Mencintai Allah dan Nabi Muhammad SAW, 2. Cinta Akan Tanah Air, 3. Pentingnya menuntut Ilmu, 4. Kasih Sayang Orang Tua, 5. Indahnya Akhlaqul Karimah. Dinilai dari penghayatan, vokal, dan diksi.",
     fee: 35000,
     kuota: "25 Peserta",
     formValue: "Puisi Islami",

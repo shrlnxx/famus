@@ -369,7 +369,7 @@ export default function LombaDetailModal({
               <Award className="w-4 h-4 text-emerald-700 shrink-0" />
               <span className="text-xs text-emerald-900 font-medium">
                 Seluruh peserta berhak mendapatkan{" "}
-                <strong>Piagam Penghargaan untuk Setiap Peserta</strong>{" "}
+                <strong>Piagam Penghargaan Digital untuk Setiap Peserta</strong>{" "}
               </span>
             </div>
           </div>

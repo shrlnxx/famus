@@ -328,6 +328,42 @@ export default function LombaDetailModal({
               </div>
             </div>
 
+            {/* Juara Harapan I, II, III */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              {/* Juara Harapan 1 */}
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm flex flex-col items-center text-center">
+                <span className="text-2xl mb-1">🎖️</span>
+                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                  Juara Harapan I
+                </span>
+                <p className="text-[11px] text-slate-600 font-medium mt-1">
+                  Trofi Kejuaraan + Piagam Penghargaan
+                </p>
+              </div>
+
+              {/* Juara Harapan 2 */}
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm flex flex-col items-center text-center">
+                <span className="text-2xl mb-1">🎖️</span>
+                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                  Juara Harapan II
+                </span>
+                <p className="text-[11px] text-slate-600 font-medium mt-1">
+                  Trofi Kejuaraan + Piagam Penghargaan
+                </p>
+              </div>
+
+              {/* Juara Harapan 3 */}
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm flex flex-col items-center text-center">
+                <span className="text-2xl mb-1">🎖️</span>
+                <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                  Juara Harapan III
+                </span>
+                <p className="text-[11px] text-slate-600 font-medium mt-1">
+                  Trofi Kejuaraan + Piagam Penghargaan
+                </p>
+              </div>
+            </div>
+
             {/* Note for all participants */}
             <div className="mt-3 p-3 rounded-xl bg-emerald-50/80 border border-emerald-100 flex items-center gap-2.5">
               <Award className="w-4 h-4 text-emerald-700 shrink-0" />

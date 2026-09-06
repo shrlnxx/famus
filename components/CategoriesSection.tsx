@@ -23,7 +23,7 @@ const categories: Category[] = [
     level: "6-13 Tahun",
     desc: "Membaca maqra' pilihan dengan tartil, memperhatikan tajwid, fashohah, suara, lagu, dan adab.",
     fee: 35000,
-    kuota: "25 Peserta",
+    kuota: "50 Peserta",
     formValue: "MTQ",
   },
   {
@@ -37,7 +37,7 @@ const categories: Category[] = [
   },
   {
     icon: PenTool,
-    title: "Cipta Baca Puisi Islami",
+    title: "Baca Puisi Islami",
     level: "6-13 Tahun",
     desc: "Membawakan karya puisi islami yang belum pernah dilombakan, dinilai dari penghayatan, vokal, dan diksi.",
     fee: 35000,
@@ -102,9 +102,9 @@ const categories: Category[] = [
     icon: Brain,
     title: "Cerdas Cermat Islami",
     level: "Tim Beregu (2 Anak)",
-    desc: "Lomba beregu 2 anak usia 9-13 tahun, menjawab soal pilihan ganda, isian singkat, dan babak rebutan.",
+    desc: "Lomba beregu 2 anak usia 9-13 tahun, menjawab soal pilihan ganda, Soal Wajib, dan babak rebutan.",
     fee: 60000,
-    kuota: "30 Tim",
+    kuota: "25 Tim",
     formValue: "CCI",
   },
 ];

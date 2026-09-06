@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Users,
   Music,
+  MessageCircle,
 } from "lucide-react";
 
 // --- Types ---
@@ -40,20 +41,51 @@ type FormValues = {
 
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
+// --- WhatsApp Group Links Dictionary ---
+
+const WA_GROUP_LINKS: Record<string, string> = {
+  "Musabaqoh Tartilil Qur'an": "https://chat.whatsapp.com/CTf6TYpUZ3R9FsI4OBnXLn",
+  "Menyanyi Religi": "https://chat.whatsapp.com/EhKvGvghl74JWyLGwcY43f",
+  "Baca Puisi Islami": "https://chat.whatsapp.com/IcpLAol5MiUIJu6mZmooRv",
+  "Pidato Putra": "https://chat.whatsapp.com/DiHQNMDs9OYG1YdaT7eDLi",
+  "Pidato Putri": "https://chat.whatsapp.com/E6d8BxD7sqMAiGi7Mvss1r",
+  "Mewarnai Junior": "https://chat.whatsapp.com/E6d8BxD7sqMAiGi7Mvss1r",
+  "Mewarnai Senior": "https://chat.whatsapp.com/F4DDbwqLVyrFunvntfl5Wr",
+  "Storytelling": "https://chat.whatsapp.com/GYROXgY4KikH4BO6eCjkii",
+  "Adzan": "https://chat.whatsapp.com/InHrHkZXmWNG8gBShIrFuS",
+  "Cerdas Cermat Islami": "https://chat.whatsapp.com/KMAxAiVmxoVHuv4NXVO8W9",
+};
+
+const normalizeCategory = (category: string): string => {
+  if (category === "MTQ") return "Musabaqoh Tartilil Qur'an";
+  if (category === "Puisi Islami") return "Baca Puisi Islami";
+  if (category === "CCI") return "Cerdas Cermat Islami";
+  return category;
+};
+
+const getWhatsAppGroupLink = (category: string): string => {
+  const normalized = normalizeCategory(category);
+  return (
+    WA_GROUP_LINKS[normalized] ||
+    WA_GROUP_LINKS[category] ||
+    "https://chat.whatsapp.com/CTf6TYpUZ3R9FsI4OBnXLn"
+  );
+};
+
 // --- Constants ---
 
 const CABANG_OPTIONS = [
   { value: "", label: "Pilih salah satu cabang perlombaan...", disabled: true, fee: 0 },
-  { value: "MTQ", label: "Musabaqoh Tartilil Qur'an (MTQ)", fee: 35000 },
+  { value: "Musabaqoh Tartilil Qur'an", label: "Musabaqoh Tartilil Qur'an (MTQ)", fee: 35000 },
   { value: "Menyanyi Religi", label: "Menyanyi Religi", fee: 35000 },
-  { value: "Puisi Islami", label: "Baca Puisi Islami", fee: 35000 },
+  { value: "Baca Puisi Islami", label: "Baca Puisi Islami", fee: 35000 },
   { value: "Pidato Putra", label: "Pidato Putra", fee: 35000 },
   { value: "Pidato Putri", label: "Pidato Putri", fee: 35000 },
   { value: "Mewarnai Junior", label: "Mewarnai Junior (6–9 Tahun)", fee: 30000 },
   { value: "Mewarnai Senior", label: "Mewarnai Senior (10–13 Tahun)", fee: 30000 },
   { value: "Storytelling", label: "Storytelling (Bercerita)", fee: 35000 },
   { value: "Adzan", label: "Adzan (Khusus Putra)", fee: 35000 },
-  { value: "CCI", label: "Cerdas Cermat Islami (Tim Beregu 2 Anak)", fee: 60000 },
+  { value: "Cerdas Cermat Islami", label: "Cerdas Cermat Islami (Tim Beregu 2 Anak)", fee: 60000 },
 ];
 
 const LAGU_OPTIONS = [
@@ -84,7 +116,7 @@ const LAGU_OPTIONS = [
 ];
 
 const GAS_ENDPOINT =
-  "https://script.google.com/macros/s/AKfycbxRbiAI-Oz-m7EnsusKbmf13LxU_mXClCiht3xt-CZgFQJySFNu4CppJEiH88NAkXnx/exec";
+  "https://script.google.com/macros/s/AKfycbzoXRzkeSN-jZdY3ggZDV0JCLMLZJ8Ac-xsu5iNKq4abWV0ELMjb--8QpGDNc9X1dgD/exec";
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB
 
@@ -318,6 +350,8 @@ export default function RegistrationForm() {
   const [tfFile, setTfFile] = useState<File | null>(null);
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({});
 
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [submittedCabang, setSubmittedCabang] = useState("");
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [successName, setSuccessName] = useState("");
@@ -326,8 +360,10 @@ export default function RegistrationForm() {
   const cabangLomba = watch("cabangLomba", "");
   const selectedLagu = watch("laguwajib", "");
   const isMenyanyi = cabangLomba === "Menyanyi Religi";
-  const isCCI = cabangLomba === "CCI";
-  const selectedOption = CABANG_OPTIONS.find((o) => o.value === cabangLomba);
+  const isCCI = cabangLomba === "CCI" || cabangLomba === "Cerdas Cermat Islami";
+  const selectedOption = CABANG_OPTIONS.find(
+    (o) => o.value === cabangLomba || o.value === normalizeCategory(cabangLomba)
+  );
   // All competitions are paid — Bukti Transfer is always required
   const isPaid = true;
   const selectedLaguObj = LAGU_OPTIONS.find((l) => l.title === selectedLagu);
@@ -337,12 +373,37 @@ export default function RegistrationForm() {
     const handler = (e: Event) => {
       const ev = e as CustomEvent<string>;
       if (ev.detail) {
-        setValue("cabangLomba", ev.detail, { shouldValidate: true });
+        setValue("cabangLomba", normalizeCategory(ev.detail), { shouldValidate: true });
+        setIsSuccess(false);
       }
     };
     window.addEventListener("select-category", handler);
     return () => window.removeEventListener("select-category", handler);
   }, [setValue]);
+
+  // Smooth scroll to top of section on success
+  useEffect(() => {
+    if (isSuccess) {
+      const el = document.getElementById("pendaftaran");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [isSuccess]);
+
+  // Reset form handler for "Daftar Peserta Lain"
+  const handleResetForm = () => {
+    setIsSuccess(false);
+    setSubmitStatus("idle");
+    setSuccessName("");
+    setSubmittedCabang("");
+    setErrorMessage("");
+    reset();
+    setFotoFile(null);
+    setKkFile(null);
+    setTfFile(null);
+    setFileErrors({});
+  };
 
   // Copy rekening handler with smooth state feedback
   const handleCopyRek = () => {
@@ -458,12 +519,9 @@ export default function RegistrationForm() {
 
       if (result.success) {
         setSuccessName(namaPesertaFinal ?? "");
+        setSubmittedCabang(data.cabangLomba);
+        setIsSuccess(true);
         setSubmitStatus("success");
-        reset();
-        setFotoFile(null);
-        setKkFile(null);
-        setTfFile(null);
-        setFileErrors({});
       } else {
         setSubmitStatus("error");
         setErrorMessage(
@@ -481,91 +539,135 @@ export default function RegistrationForm() {
   };
 
   const isSubmitting = submitStatus === "loading";
+  const watchedCabangLomba = watch("cabangLomba", "");
+  const activeCabang = watchedCabangLomba || submittedCabang;
+  const currentWaLink = WA_GROUP_LINKS[activeCabang] || getWhatsAppGroupLink(activeCabang);
 
   return (
     <section id="pendaftaran" className="py-20 sm:py-24 lg:py-32 bg-[#FAF8F5] scroll-mt-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {isSuccess ? (
+          /* ══════════════════════════════════════════════════
+             SUCCESS CARD (SCREEN SWAP)
+          ══════════════════════════════════════════════════ */
+          <div className="bg-zinc-50 rounded-3xl sm:rounded-[32px] border border-emerald-200/90 shadow-[0_12px_45px_-10px_rgba(16,185,129,0.12)] p-6 sm:p-10 lg:p-14 text-center max-w-2xl mx-auto animate-fade-in">
+            {/* Checkmark Icon badge */}
+            <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-emerald-100 flex items-center justify-center mb-6 shadow-inner ring-8 ring-emerald-50">
+              <CheckCircle2 className="w-12 h-12 sm:w-14 sm:h-14 text-emerald-600" />
+            </div>
 
-        {/* --- Header Section --- */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs font-bold uppercase tracking-wider shadow-xs mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Pendaftaran Resmi Peserta</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-900 tracking-tight leading-tight">
-            Formulir Pendaftaran FAMUS 2026
-          </h2>
-          <p className="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-            Lengkapi formulir di bawah ini dengan data yang valid. Data akan digunakan untuk verifikasi berkas, pencetakan piagam resmi, dan komunikasi teknis lomba.
-          </p>
-        </div>
+            {/* Eyebrow badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Pendaftaran Berhasil Dikirim</span>
+            </div>
 
-        {/* --- Success Notification Banner --- */}
-        {submitStatus === "success" && (
-          <div className="mb-8 p-6 sm:p-8 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-sm">
-            <div className="flex items-start gap-3.5">
-              <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="font-extrabold text-emerald-950 text-lg">
-                  🎉 Pendaftaran Berhasil!
-                </h4>
-                <p className="text-sm text-emerald-800/90 mt-1.5 leading-relaxed">
-                  Pendaftaran FAMUS 2026{successName ? <> atas nama <strong>{successName}</strong></> : ""} berhasil diterima. Data dan dokumen pendaftaran telah berhasil dikirim.
-                </p>
-                <p className="text-xs text-emerald-700/80 mt-2 leading-relaxed">
-                  Panitia akan segera melakukan verifikasi berkas dan menghubungi nomor WhatsApp Anda untuk konfirmasi teknis serta tautan grup peserta.
-                </p>
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              Selamat, Pendaftaran Berhasil!
+            </h3>
+
+            <p className="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+              Data pendaftaran dan berkas administrasi peserta telah berhasil kami terima untuk diajukan ke panitia verifikasi.
+            </p>
+
+            {/* Summary Details Box */}
+            <div className="my-6 p-5 sm:p-6 rounded-2xl bg-white border border-emerald-100/90 shadow-xs text-left space-y-3">
+              {successName && (
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs sm:text-sm border-b border-slate-100 pb-2.5">
+                  <span className="text-slate-500 font-medium">Nama Peserta:</span>
+                  <span className="font-bold text-slate-900">{successName}</span>
+                </div>
+              )}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs sm:text-sm border-b border-slate-100 pb-2.5">
+                <span className="text-slate-500 font-medium">Cabang Perlombaan:</span>
+                <span className="font-extrabold text-emerald-800">
+                  {normalizeCategory(activeCabang)}
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Status Berkas:</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" /> Diterima Sistem Panitia
+                </span>
               </div>
             </div>
-            <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setSubmitStatus("idle");
-                  setSuccessName("");
-                  setErrorMessage("");
-                  reset();
-                  setFotoFile(null);
-                  setKkFile(null);
-                  setTfFile(null);
-                  setFileErrors({});
-                }}
-                className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
-              >
-                <Send className="w-4 h-4" />
-                <span>Daftar Peserta Lain</span>
-              </button>
+
+            <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 mb-8 text-xs sm:text-sm text-emerald-900 leading-relaxed text-left sm:text-center">
+              Seluruh informasi teknis, nomor undian, kisi-kisi materi, dan jadwal penampilan akan dikoordinasikan melalui grup WhatsApp resmi cabang lomba ini:
+            </div>
+
+            {/* Large Dynamic CTA WhatsApp Button */}
+            <div className="space-y-4">
               <a
-                href="https://wa.me/6281234567890"
+                href={currentWaLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 text-sm font-bold transition-colors inline-flex items-center justify-center gap-2 border border-emerald-200 shadow-xs"
+                className="w-full py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-base sm:text-lg inline-flex items-center justify-center gap-3 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-700/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
               >
-                <span>Konfirmasi ke Panitia</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                <span>Gabung Grup WhatsApp</span>
+                <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 opacity-80" />
               </a>
+
+              {/* Secondary Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleResetForm}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all shadow-xs"
+                >
+                  <Send className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Daftar Peserta Lain</span>
+                </button>
+                <a
+                  href="https://wa.me/6281234567890"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-200/70 text-emerald-800 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all shadow-xs"
+                >
+                  <span>Bantuan Panitia</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+                </a>
+              </div>
             </div>
           </div>
-        )}
-
-        {/* --- Error Notification Banner --- */}
-        {submitStatus === "error" && (
-          <div className="mb-8 p-6 rounded-2xl bg-red-50 border border-red-200 shadow-sm flex items-start gap-3.5">
-            <XCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-extrabold text-red-900 text-base">
-                Gagal Mengirim Formulir
-              </h4>
-              <p className="text-xs sm:text-sm text-red-700/90 mt-1 leading-relaxed">
-                {errorMessage} Silakan cek kelengkapan berkas Anda, lalu coba kirim kembali atau hubungi panitia melalui WhatsApp.
+        ) : (
+          /* ══════════════════════════════════════════════════
+             STANDARD REGISTRATION FORM
+          ══════════════════════════════════════════════════ */
+          <>
+            {/* --- Header Section --- */}
+            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs font-bold uppercase tracking-wider shadow-xs mb-4">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Pendaftaran Resmi Peserta</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-slate-900 tracking-tight leading-tight">
+                Formulir Pendaftaran FAMUS 2026
+              </h2>
+              <p className="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+                Lengkapi formulir di bawah ini dengan data yang valid. Data akan digunakan untuk verifikasi berkas, pencetakan piagam resmi, dan komunikasi teknis lomba.
               </p>
             </div>
-          </div>
-        )}
 
-        {/* --- Main Card --- */}
-        <div className="bg-white rounded-3xl sm:rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-200/80 p-6 sm:p-10 lg:p-14">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 sm:space-y-12" noValidate>
+            {/* --- Error Notification Banner --- */}
+            {submitStatus === "error" && (
+              <div className="mb-8 p-6 rounded-2xl bg-red-50 border border-red-200 shadow-sm flex items-start gap-3.5">
+                <XCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-extrabold text-red-900 text-base">
+                    Gagal Mengirim Formulir
+                  </h4>
+                  <p className="text-xs sm:text-sm text-red-700/90 mt-1 leading-relaxed">
+                    {errorMessage} Silakan cek kelengkapan berkas Anda, lalu coba kirim kembali atau hubungi panitia melalui WhatsApp.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* --- Main Card --- */}
+            <div className="bg-white rounded-3xl sm:rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-slate-200/80 p-6 sm:p-10 lg:p-14">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 sm:space-y-12" noValidate>
 
             {/* ══════════════════════════════════════════════════
                 BAGIAN 1 — PILIHAN CABANG LOMBA
@@ -1128,8 +1230,9 @@ export default function RegistrationForm() {
             </a>
           </div>
         </div>
-
-      </div>
-    </section>
+      </>
+    )}
+  </div>
+</section>
   );
 }

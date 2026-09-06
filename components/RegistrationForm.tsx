@@ -83,7 +83,7 @@ const CABANG_OPTIONS = [
   { value: "Pidato Putri", label: "Pidato Putri", fee: 35000 },
   { value: "Mewarnai Junior", label: "Mewarnai Junior (6–9 Tahun)", fee: 30000 },
   { value: "Mewarnai Senior", label: "Mewarnai Senior (10–13 Tahun)", fee: 30000 },
-  { value: "Storytelling", label: "Storytelling (Bercerita)", fee: 35000 },
+  { value: "Storytelling", label: "Bercerita", fee: 35000 },
   { value: "Adzan", label: "Adzan (Khusus Putra)", fee: 35000 },
   { value: "Cerdas Cermat Islami", label: "Cerdas Cermat Islami (Tim Beregu 2 Anak)", fee: 60000 },
 ];

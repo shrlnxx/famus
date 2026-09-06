@@ -82,7 +82,7 @@ const categories: Category[] = [
   },
   {
     icon: BookMarked,
-    title: "Storytelling (Bercerita)",
+    title: "Bercerita",
     level: "6-13 Tahun",
     desc: "Menceritakan kisah fabel atau non-fabel yang mengandung hikmah islami (tanpa membawa teks).",
     fee: 35000,

@@ -222,14 +222,14 @@ export default function TermsSection() {
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  Digelar secara hibrida melalui Zoom Meeting &amp;                 </p>
+                  Digelar secara Online melalui Zoom Meeting &amp;                 </p>
               </div>
 
               {/* Status footer */}
               <div className="pt-6 mt-6 border-t border-stone-100 flex items-center justify-between text-xs text-slate-500 font-semibold">
                 <span className="flex items-center gap-1.5 text-amber-700">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  Sesi Hibrida
+                  Online
                 </span>
                 <span className="text-stone-400">Online</span>
               </div>
@@ -390,7 +390,7 @@ export default function TermsSection() {
                   </div>
 
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Digelar secara hibrida melalui Zoom Meeting &amp;                   </p>
+                    Digelar secara Online melalui Zoom Meeting &amp;                   </p>
                 </div>
               </div>
 

@@ -20,7 +20,7 @@ const pillars = [
     icon: Gift,
     color: "emerald" as const,
     title: "Fasilitas & Apresiasi Peserta",
-    desc: "Setiap anak berhak merasa dihargai. Seluruh peserta mendapatkan piagam penghargaan.",
+    desc: "Setiap anak berhak merasa dihargai. Seluruh peserta mendapatkan piagam penghargaan Digital.",
     footer: "Piagam Penghargaan",
   },
 ];

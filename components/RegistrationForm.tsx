@@ -31,6 +31,7 @@ type FormValues = {
   namaKelompok?: string;
   namaPeserta1?: string;
   namaPeserta2?: string;
+  usia2?: string;
   namaAnak: string;
   usia: string;
   asalLembaga: string;
@@ -502,16 +503,21 @@ export default function RegistrationForm() {
         : data.namaAnak;
 
       const detailKhususFinal = isMenyanyi
-        ? (data.laguwajib ?? "")
+        ? `Lagu: ${data.laguwajib ?? ""}`
         : isCCI
-          ? `Regu: ${data.namaKelompok ?? ""} | Peserta 1: ${data.namaPeserta1 ?? ""} | Peserta 2: ${data.namaPeserta2 ?? ""}`
+          ? `Regu: ${data.namaKelompok ?? ""} | Peserta 1: ${data.namaPeserta1 ?? ""} (${data.usia ?? ""} th) | Peserta 2: ${data.namaPeserta2 ?? ""} (${data.usia2 ?? ""} th)`
           : "";
 
       const payload = {
         cabangLomba: data.cabangLomba,
         detailKhusus: detailKhususFinal,
         namaAnak: namaPesertaFinal,
+        namaKelompok: data.namaKelompok ?? "",
+        namaPeserta1: data.namaPeserta1 ?? "",
+        namaPeserta2: data.namaPeserta2 ?? "",
         usia: data.usia,
+        usia2: data.usia2 ?? "",
+        laguwajib: data.laguwajib ?? "",
         asalLembaga: data.asalLembaga,
         namaPendamping: data.namaPendamping,
         noHp: data.noHp,
@@ -854,6 +860,7 @@ export default function RegistrationForm() {
                         </p>
                       </div>
                     )}
+
                   </div>
                 </div>
 
@@ -945,53 +952,67 @@ export default function RegistrationForm() {
                       </FieldGroup>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <FieldGroup
-                          label="Usia (Tahun)"
-                          required
-                          error={errors.usia?.message}
-                          helper={
-                            cabangLomba === "Mewarnai Junior"
-                              ? "Maksimal 9 tahun (Mewarnai Junior)"
-                              : cabangLomba === "Mewarnai Senior"
-                                ? "Rentang 10–13 tahun"
-                                : isCCI
-                                  ? "Rentang 9–13 tahun"
-                                  : "Batas usia: maksimal 13 tahun"
-                          }
-                        >
-                          <input
-                            type="number"
-                            min={4}
-                            max={cabangLomba === "Mewarnai Junior" ? 9 : 13}
-                            {...register("usia", {
-                              required: "Usia wajib diisi.",
-                              min: { value: 4, message: "Usia minimal 4 tahun." },
-                              validate: (val) => {
-                                const num = parseInt(val, 10);
-                                if (isNaN(num)) return "Masukkan angka usia yang valid.";
-                                if (cabangLomba === "Mewarnai Junior" && num > 9) {
-                                  return "Batas usia Mewarnai Junior maksimal 9 tahun.";
-                                }
-                                if (num > 13) {
-                                  return "Batas maksimal usia peserta adalah 13 tahun.";
-                                }
-                                return true;
-                              },
-                            })}
-                            placeholder={isCCI ? "Contoh: 10" : "Contoh: 9"}
-                            className={inputCls(!!errors.usia)}
-                          />
-                        </FieldGroup>
-                      </div>
+                    {isCCI ? (
+                      /* CCI: 2 kolom usia berdampingan + 1 kolom asal lembaga */
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FieldGroup
+                            label="Usia Peserta 1 (Tahun)"
+                            required
+                            error={errors.usia?.message}
+                            helper="Usia Ketua Regu, rentang 9–13 tahun"
+                          >
+                            <input
+                              type="number"
+                              min={9}
+                              max={13}
+                              {...register("usia", {
+                                required: "Usia Peserta 1 wajib diisi.",
+                                min: { value: 9, message: "Usia minimal 9 tahun." },
+                                validate: (val) => {
+                                  const num = parseInt(val, 10);
+                                  if (isNaN(num)) return "Masukkan angka usia yang valid.";
+                                  if (num > 13) return "Batas maksimal usia peserta adalah 13 tahun.";
+                                  return true;
+                                },
+                              })}
+                              placeholder="Contoh: 11"
+                              className={inputCls(!!errors.usia)}
+                            />
+                          </FieldGroup>
 
-                      <div className="md:col-span-2">
+                          <FieldGroup
+                            label="Usia Peserta 2 (Tahun)"
+                            required
+                            error={errors.usia2?.message}
+                            helper="Usia Anggota Regu, rentang 9–13 tahun"
+                          >
+                            <input
+                              type="number"
+                              min={9}
+                              max={13}
+                              {...register("usia2", {
+                                required: isCCI ? "Usia Peserta 2 wajib diisi." : false,
+                                min: { value: 9, message: "Usia minimal 9 tahun." },
+                                validate: (val) => {
+                                  if (!isCCI) return true;
+                                  const num = parseInt(val ?? "0", 10);
+                                  if (isNaN(num)) return "Masukkan angka usia yang valid.";
+                                  if (num > 13) return "Batas maksimal usia peserta adalah 13 tahun.";
+                                  return true;
+                                },
+                              })}
+                              placeholder="Contoh: 12"
+                              className={inputCls(!!errors.usia2)}
+                            />
+                          </FieldGroup>
+                        </div>
+
                         <FieldGroup
                           label="Asal Sekolah / Lembaga / TPQ"
                           required
                           error={errors.asalLembaga?.message}
-                          helper="Nama TPQ, Madrasah, SD/MI, atau sekolah asal peserta"
+                          helper="Nama TPQ, Madrasah, SD/MI, atau sekolah asal peserta (harus sama untuk 1 regu)"
                         >
                           <input
                             type="text"
@@ -1003,7 +1024,66 @@ export default function RegistrationForm() {
                           />
                         </FieldGroup>
                       </div>
-                    </div>
+                    ) : (
+                      /* Non-CCI: layout standar 1+2 */
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <FieldGroup
+                            label="Usia (Tahun)"
+                            required
+                            error={errors.usia?.message}
+                            helper={
+                              cabangLomba === "Mewarnai Junior"
+                                ? "Maksimal 9 tahun (Mewarnai Junior)"
+                                : cabangLomba === "Mewarnai Senior"
+                                  ? "Rentang 10–13 tahun"
+                                  : "Batas usia: maksimal 13 tahun"
+                            }
+                          >
+                            <input
+                              type="number"
+                              min={4}
+                              max={cabangLomba === "Mewarnai Junior" ? 9 : 13}
+                              {...register("usia", {
+                                required: "Usia wajib diisi.",
+                                min: { value: 4, message: "Usia minimal 4 tahun." },
+                                validate: (val) => {
+                                  const num = parseInt(val, 10);
+                                  if (isNaN(num)) return "Masukkan angka usia yang valid.";
+                                  if (cabangLomba === "Mewarnai Junior" && num > 9) {
+                                    return "Batas usia Mewarnai Junior maksimal 9 tahun.";
+                                  }
+                                  if (num > 13) {
+                                    return "Batas maksimal usia peserta adalah 13 tahun.";
+                                  }
+                                  return true;
+                                },
+                              })}
+                              placeholder="Contoh: 9"
+                              className={inputCls(!!errors.usia)}
+                            />
+                          </FieldGroup>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <FieldGroup
+                            label="Asal Sekolah / Lembaga / TPQ"
+                            required
+                            error={errors.asalLembaga?.message}
+                            helper="Nama TPQ, Madrasah, SD/MI, atau sekolah asal peserta"
+                          >
+                            <input
+                              type="text"
+                              {...register("asalLembaga", {
+                                required: "Asal sekolah atau lembaga wajib diisi.",
+                              })}
+                              placeholder="Contoh: TPQ Al-Ikhlas Sepanjang / SDIT Permata"
+                              className={inputCls(!!errors.asalLembaga)}
+                            />
+                          </FieldGroup>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

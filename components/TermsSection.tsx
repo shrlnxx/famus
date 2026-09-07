@@ -530,7 +530,7 @@ export default function TermsSection() {
                   <div>
                     <p className="font-bold text-sm text-slate-900">Pas Foto 3×4</p>
                     <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
-                      Foto formal terbaru berwarna untuk pencetakan ID card peserta dan lampiran sertifikat resmi.
+                      Foto formal terbaru berwarna dari peserta
                     </p>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
@@ -8,8 +9,14 @@ export default function Footer() {
           {/* 1. About */}
           <div>
             <div className="flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-                F
+              <div className="w-10 h-10 relative flex items-center justify-center p-1 rounded-xl bg-white/10 backdrop-blur-sm border border-emerald-800/60 shadow-sm shrink-0">
+                <Image
+                  src="/favicon.png"
+                  alt="Logo FAMUS 2026"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-extrabold text-[15px] text-white tracking-tight">
@@ -83,6 +90,17 @@ export default function Footer() {
                   className="hover:text-white transition-colors text-emerald-100/70 hover:underline"
                 >
                   Jadwal &amp; Timeline
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/GUIDEBOOK%20FAMUS%202026%20.pdf"
+                  download="GUIDEBOOK FAMUS 2026.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors text-emerald-100/70 hover:underline"
+                >
+                  Unduh Guide Book / Juknis (PDF)
                 </a>
               </li>
               <li>

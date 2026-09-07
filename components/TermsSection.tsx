@@ -27,10 +27,6 @@ export default function TermsSection() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleDownload = () => {
-    alert("Mengunduh Juknis & Panduan Lengkap FAMUS 2026 (PDF)...");
-  };
-
   return (
     <>
       {/* ═════════════════════════════════════════════════════════════════
@@ -473,13 +469,16 @@ export default function TermsSection() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={handleDownload}
+              <a
+                href="/GUIDEBOOK%20FAMUS%202026%20.pdf"
+                download="GUIDEBOOK FAMUS 2026.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all shadow-xs hover:shadow shrink-0"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Unduh PDF</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>

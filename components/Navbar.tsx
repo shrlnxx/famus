@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Menu, X, Download } from "lucide-react";
 
 const navLinks = [
@@ -34,8 +35,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* ── Logo ── */}
           <a href="#" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 group-hover:bg-emerald-700 flex items-center justify-center text-white font-extrabold text-sm shadow-sm transition-colors">
-              F
+            <div className="w-9 h-9 relative flex items-center justify-center shrink-0">
+              <Image
+                src="/favicon.png"
+                alt="Logo FAMUS 2026"
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
+                priority
+              />
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-extrabold text-[15px] text-emerald-700 tracking-tight">
@@ -59,7 +67,10 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="#syarat"
+              href="/GUIDEBOOK%20FAMUS%202026%20.pdf"
+              download="GUIDEBOOK FAMUS 2026.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
             >
               <Download className="w-4 h-4" />
@@ -106,6 +117,17 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
+            <a
+              href="/GUIDEBOOK%20FAMUS%202026%20.pdf"
+              download="GUIDEBOOK FAMUS 2026.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleNavClick}
+              className="px-3 py-2.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Guide Book (PDF)
+            </a>
             <a
               href="#pendaftaran"
               onClick={handleNavClick}

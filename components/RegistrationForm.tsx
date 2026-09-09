@@ -119,19 +119,85 @@ const LAGU_OPTIONS = [
 const GAS_ENDPOINT =
   "https://script.google.com/macros/s/AKfycbxRbiAI-Oz-m7EnsusKbmf13LxU_mXClCiht3xt-CZgFQJySFNu4CppJEiH88NAkXnx/exec";
 
-const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB batas awal upload sebelum auto-kompresi
 
-// --- Helper: File to Base64 ---
+// --- Helper: Kompresi Gambar & Konversi ke Base64 ---
 
-function convertBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1]); // strip data URL prefix
+async function compressAndConvertToBase64(
+  file: File,
+  maxDimension = 1280,
+  quality = 0.8
+): Promise<{ base64: string; mimeType: string }> {
+  // Jika bukan file gambar biasa (misal PDF), baca langsung tanpa canvas
+  if (!file.type.startsWith("image/")) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve({ base64: result.split(",")[1], mimeType: file.type });
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      try {
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          throw new Error("Canvas context tidak didukung");
+        }
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        const base64 = dataUrl.split(",")[1];
+        resolve({ base64, mimeType: "image/jpeg" });
+      } catch (err) {
+        console.warn("[Kompresi] Gagal menggunakan canvas, fallback ke raw reader:", err);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result as string;
+          resolve({ base64: res.split(",")[1], mimeType: file.type });
+        };
+        reader.onerror = () => resolve({ base64: "", mimeType: file.type });
+        reader.readAsDataURL(file);
+      }
     };
-    reader.onerror = (err) => reject(err);
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const res = reader.result as string;
+        resolve({ base64: res.split(",")[1], mimeType: file.type });
+      };
+      reader.onerror = () => resolve({ base64: "", mimeType: file.type });
+      reader.readAsDataURL(file);
+    };
+
+    img.src = objectUrl;
   });
 }
 
@@ -455,7 +521,7 @@ export default function RegistrationForm() {
     if (file.size > MAX_FILE_BYTES) {
       setFileErrors((p) => ({
         ...p,
-        [key]: `Ukuran berkas melebihi batas 2 MB (${(file.size / (1024 * 1024)).toFixed(1)} MB).`,
+        [key]: `Ukuran berkas melebihi batas 5 MB (${(file.size / (1024 * 1024)).toFixed(1)} MB).`,
       }));
       return false;
     }
@@ -491,11 +557,11 @@ export default function RegistrationForm() {
     scrollToSection();
 
     try {
-      // Convert all three files to Base64 in parallel
-      const [fotoBase64, kkBase64, tfBase64] = await Promise.all([
-        convertBase64(fotoFile!),
-        convertBase64(kkFile!),
-        convertBase64(tfFile!),
+      // Convert all three files with auto-compression in parallel
+      const [fotoData, kkData, tfData] = await Promise.all([
+        compressAndConvertToBase64(fotoFile!),
+        compressAndConvertToBase64(kkFile!),
+        compressAndConvertToBase64(tfFile!),
       ]);
 
       const namaPesertaFinal = isCCI
@@ -521,45 +587,86 @@ export default function RegistrationForm() {
         asalLembaga: data.asalLembaga,
         namaPendamping: data.namaPendamping,
         noHp: data.noHp,
-        fotoBase64,
-        fotoMimeType: fotoFile!.type,
-        kkBase64,
-        kkMimeType: kkFile!.type,
-        tfBase64,
-        tfMimeType: tfFile!.type,
+        fotoBase64: fotoData.base64,
+        fotoMimeType: fotoData.mimeType,
+        kkBase64: kkData.base64,
+        kkMimeType: kkData.mimeType,
+        tfBase64: tfData.base64,
+        tfMimeType: tfData.mimeType,
       };
 
-      // Send to server API route proxy first (avoids CORS issues and provides descriptive errors),
-      // with direct fallback to GAS_ENDPOINT.
-      let response: Response;
+      // 1. Coba kirim via server API proxy (/api/register) terlebih dahulu
+      let response: Response | null = null;
+      let responseText = "";
+
       try {
         response = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-      } catch {
-        // Fallback directly to Google Apps Script endpoint if proxy route is unavailable
-        response = await fetch(GAS_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-        });
+
+        if (response.ok) {
+          responseText = await response.text();
+        } else {
+          console.warn("[Register Proxy] Status bukan OK:", response.status);
+          // Jika serverless function error (misal 413 / 504 / 500), coba ambil teks
+          responseText = await response.text();
+        }
+      } catch (proxyErr) {
+        console.warn("[Register Proxy] Network failure, bersiap fallback langsung ke GAS:", proxyErr);
       }
 
-      let result: { success?: boolean; message?: string; data?: Record<string, unknown> };
-      try {
-        result = await response.json();
-      } catch {
-        // If response is not parseable JSON but HTTP status is OK, treat as success
-        if (response.ok || response.type === "opaque") {
-          result = { success: true, message: "Pendaftaran berhasil dikirim." };
-        } else {
-          throw new Error("Gagal memproses respons dari server.");
+      // 2. Fallback langsung ke endpoint Google Apps Script jika proxy gagal atau status server bukan OK (4xx / 5xx)
+      if (!response || !response.ok) {
+        try {
+          console.log("[Register] Menjalankan fallback langsung ke endpoint Google Apps Script...");
+          response = await fetch(GAS_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+          });
+          responseText = await response.text();
+        } catch (gasErr) {
+          console.error("[Register] Direct GAS request error:", gasErr);
         }
       }
 
-      // Safeguard: jika respons memuat error setHeaders, eksekusi penyimpanan di Apps Script telah selesai
+      // 3. Evaluasi hasil respon
+      let result: { success?: boolean; message?: string; data?: Record<string, unknown> } = {};
+
+      if (responseText && responseText.trim().length > 0) {
+        try {
+          result = JSON.parse(responseText);
+        } catch {
+          // Respons berupa teks biasa (bukan JSON)
+          if (
+            (response && (response.ok || response.type === "opaque")) ||
+            responseText.toLowerCase().includes("berhasil") ||
+            responseText.toLowerCase().includes("success") ||
+            responseText.toLowerCase().includes("aktif")
+          ) {
+            result = { success: true, message: "Pendaftaran berhasil dikirim." };
+          } else {
+            // Bersihkan tag HTML jika respons berupa halaman error server
+            const cleanText = responseText
+              .replace(/<[^>]*>?/gm, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+            const friendlyMsg =
+              cleanText.length > 0 && cleanText.length < 200
+                ? cleanText
+                : "Gagal memproses respons dari server. Silakan hubungi panitia melalui WhatsApp.";
+            throw new Error(friendlyMsg);
+          }
+        }
+      } else if (response && (response.ok || response.type === "opaque")) {
+        result = { success: true, message: "Pendaftaran berhasil dikirim." };
+      } else {
+        throw new Error("Tidak mendapat respons dari server. Silakan coba kembali atau hubungi panitia.");
+      }
+
+      // Safeguard: jika respons memuat error setHeaders, eksekusi penyimpanan di Apps Script sebenarnya telah selesai
       if (result.message && result.message.includes("setHeaders")) {
         result.success = true;
       }

@@ -50,7 +50,7 @@ const WA_GROUP_LINKS: Record<string, string> = {
   "Baca Puisi Islami": "https://chat.whatsapp.com/IcpLAol5MiUIJu6mZmooRv",
   "Pidato Putra": "https://chat.whatsapp.com/DiHQNMDs9OYG1YdaT7eDLi",
   "Pidato Putri": "https://chat.whatsapp.com/E6d8BxD7sqMAiGi7Mvss1r",
-  "Mewarnai Junior": "https://chat.whatsapp.com/E6d8BxD7sqMAiGi7Mvss1r",
+  "Mewarnai Junior": "https://chat.whatsapp.com/F31qNc2xiAkDeOVOBvCT2p",
   "Mewarnai Senior": "https://chat.whatsapp.com/F4DDbwqLVyrFunvntfl5Wr",
   "Storytelling": "https://chat.whatsapp.com/GYROXgY4KikH4BO6eCjkii",
   "Adzan": "https://chat.whatsapp.com/InHrHkZXmWNG8gBShIrFuS",

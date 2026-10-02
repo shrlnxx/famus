@@ -45,17 +45,17 @@ type SubmitStatus = "idle" | "loading" | "success" | "error";
 // --- WhatsApp Group Links Dictionary ---
 
 const WA_GROUP_LINKS: Record<string, string> = {
-  "Musabaqoh Tartilil Qur'an": "https://chat.whatsapp.com/CTf6TYpUZ3R9FsI4OBnXLn",
-  "Menyanyi Religi": "https://chat.whatsapp.com/EhKvGvghl74JWyLGwcY43f",
-  "Baca Puisi Islami": "https://chat.whatsapp.com/IcpLAol5MiUIJu6mZmooRv",
-  "Pidato Putra": "https://chat.whatsapp.com/DiHQNMDs9OYG1YdaT7eDLi",
-  "Pidato Putri": "https://chat.whatsapp.com/J8XxgA2B6Ig2ZhETHWmPzn?s=cl&p=a&mlu=4&ilr=4",
-  "Mewarnai Junior": "https://chat.whatsapp.com/F31qNc2xiAkDeOVOBvCT2p",
-  "Mewarnai Senior": "https://chat.whatsapp.com/F4DDbwqLVyrFunvntfl5Wr",
-  "Storytelling": "https://chat.whatsapp.com/GYROXgY4KikH4BO6eCjkii",
-  "Adzan": "https://chat.whatsapp.com/InHrHkZXmWNG8gBShIrFuS",
-  "Cerdas Cermat Islami": "https://chat.whatsapp.com/KMAxAiVmxoVHuv4NXVO8W9",
-};
+  "Musabaqoh Tartilil Qur'an": "https://chat.whatsapp.com/LhZVZGuw6Re6YUbhV5xztF",
+  "Menyanyi Religi": "https://chat.whatsapp.com/HcdYyGlmXovLFaP8plhR6K",
+  "Baca Puisi Islami": "https://chat.whatsapp.com/BJ4UnaMztbgCcrgtB5y69I",
+  "Pidato Putra": "https://chat.whatsapp.com/El5WGMhL8W2LgPlHsGHP8O",
+  "Pidato Putri": "https://chat.whatsapp.com/J8XxgA2B6Ig2ZhETHWmPzn",
+  "Mewarnai Junior": "https://chat.whatsapp.com/JA5nTAEBVo541FSuqe6arV",
+  "Mewarnai Senior": "https://chat.whatsapp.com/BeC7oVWNlqB0AStIm2co7y",
+  "Storytelling": "https://chat.whatsapp.com/Kz76nZrvakqHDnDoGZcxEk",
+  "Adzan": "https://chat.whatsapp.com/Ikld3rauGeBEDy9wDyLhDY",
+  "Cerdas Cermat Islami": "https://chat.whatsapp.com/Ejr8vODWvwyIDIuaC03b21",
+}
 
 const normalizeCategory = (category: string): string => {
   if (category === "MTQ") return "Musabaqoh Tartilil Qur'an";

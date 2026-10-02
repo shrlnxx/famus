@@ -470,7 +470,7 @@ export default function TermsSection() {
                 </div>
               </div>
               <a
-                href="/GUIDEBOOK%20FAMUS%202026%20.pdf"
+                href="/GUIDEBOOK%20FAMUS%202026.pdf"
                 download="GUIDEBOOK FAMUS 2026.pdf"
                 target="_blank"
                 rel="noopener noreferrer"

@@ -21,6 +21,8 @@ import {
   Users,
   Music,
   MessageCircle,
+  Award,
+  Download,
 } from "lucide-react";
 
 // --- Types ---
@@ -699,6 +701,129 @@ export default function RegistrationForm() {
   const watchedCabangLomba = watch("cabangLomba", "");
   const activeCabang = watchedCabangLomba || submittedCabang;
   const currentWaLink = WA_GROUP_LINKS[activeCabang] || getWhatsAppGroupLink(activeCabang);
+
+  const IS_REGISTRATION_CLOSED = true;
+
+  if (IS_REGISTRATION_CLOSED) {
+    return (
+      <section id="pendaftaran" className="py-20 sm:py-24 lg:py-28 bg-[#FAF8F5] scroll-mt-12 relative overflow-hidden">
+        {/* Ambient Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-br from-emerald-200/25 via-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="bg-white rounded-3xl sm:rounded-[36px] border border-emerald-100 shadow-[0_16px_50px_-12px_rgba(5,150,105,0.12)] p-7 sm:p-12 lg:p-16 text-center max-w-3xl mx-auto animate-fade-in">
+            
+            {/* Top Icon Badge */}
+            <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-emerald-100 via-amber-50 to-emerald-50 flex items-center justify-center mb-6 shadow-inner ring-8 ring-emerald-50/70">
+              <Lock className="w-9 h-9 sm:w-11 sm:h-11 text-emerald-800" />
+            </div>
+
+            {/* Eyebrow badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-[13px] font-extrabold uppercase tracking-wider mb-5 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Pengumuman Resmi • Pendaftaran Telah Ditutup</span>
+            </div>
+
+            {/* Dominant Title */}
+            <h2 className="text-2xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-tight">
+              Pendaftaran FAMUS 2026 Telah Resmi Ditutup
+            </h2>
+
+            {/* Sincere Appreciation */}
+            <div className="mt-6 space-y-4 max-w-2xl mx-auto text-slate-600 text-sm sm:text-base leading-relaxed">
+              <p className="font-bold text-emerald-800 text-base sm:text-lg">
+                Jazakumullahu Khairan Katsiran ✨
+              </p>
+              <p>
+                Kami segenap panitia pelaksana <strong>Festival Anak Muslim (FAMUS) 2026</strong> mengucapkan terima kasih yang sebesar-besarnya dan apresiasi setinggi-tingginya kepada seluruh santri, para ustadz/ustadzah pembimbing, serta bapak/ibu wali santri dari berbagai pondok pesantren, madrasah, TPQ, dan sekolah yang telah mendaftar dan berpartisipasi dengan luar biasa.
+              </p>
+              <p>
+                Seluruh kuota perlombaan untuk setiap cabang telah terpenuhi dengan sangat baik. Pendaftaran resmi kami tutup agar panitia dapat memusatkan persiapan verifikasi berkas, pengundian nomor peserta, dan penyelenggaraan acara secara optimal.
+              </p>
+            </div>
+
+            {/* Grand Banner: Sampai Jumpa di Festival Anak Muslim 2027 */}
+            <div className="my-8 sm:my-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 text-white shadow-xl shadow-emerald-900/15 relative overflow-hidden text-center">
+              {/* Decorative Subtle Glow */}
+              <div className="absolute -top-12 -right-12 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
+              <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-amber-400/20 rounded-full blur-xl pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-amber-300 text-xs font-bold uppercase tracking-widest mb-3.5">
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Apresiasi &amp; Semangat Syiar</span>
+                </div>
+                <h3 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white mb-3 leading-snug">
+                  Sampai Jumpa di Festival Anak Muslim 2027! 🌟
+                </h3>
+                <p className="text-xs sm:text-sm text-emerald-100/90 max-w-lg mx-auto leading-relaxed">
+                  Bagi adik-adik yang belum berkesempatan mendaftar pada edisi kali ini, jangan berkecil hati. Teruslah istiqomah belajar, mencintai Al-Qur&apos;an, dan mengasah potensi diri. Kami nantikan kehadiran dan prestasi gemilang kalian di panggung <strong>Festival Anak Muslim 2027</strong> mendatang!
+                </p>
+              </div>
+            </div>
+
+            {/* Information Card for Registered Participants */}
+            <div className="p-6 sm:p-7 rounded-2xl bg-slate-50 border border-slate-200/80 text-left space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0 font-bold">
+                  <Info className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
+                    Informasi Penting Bagi Peserta Terdaftar
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Koordinasi teknis lomba &amp; narahubung panitia
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Seluruh petunjuk teknis lomba, nomor urut tampil, tata tertib, dan jadwal pelaksanaan akan terus dikoordinasikan secara berkala melalui <strong>Grup WhatsApp Resmi</strong> masing-masing cabang lomba. Apabila ada pertanyaan atau verifikasi berkas, silakan hubungi narahubung panitia di bawah ini:
+              </p>
+
+              {/* Action & Contact Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="https://wa.me/6285641591979"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp Kak Imam</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </a>
+
+                <a
+                  href="https://wa.me/6285784066403"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp Kak Syavin</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </a>
+
+                <a
+                  href="/GUIDEBOOK%20FAMUS%202026.pdf"
+                  download="GUIDEBOOK FAMUS 2026.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm transition-all shadow-xs"
+                >
+                  <Download className="w-4 h-4 text-slate-500" />
+                  <span>Guide Book (PDF)</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="pendaftaran" className="py-20 sm:py-24 lg:py-32 bg-[#FAF8F5] scroll-mt-12">

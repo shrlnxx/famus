@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Menu, X, Download } from "lucide-react";
+import { Menu, X, Download, Lock } from "lucide-react";
 
 const navLinks = [
   { href: "#tentang", label: "Tentang" },
@@ -82,9 +82,10 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <a
               href="#pendaftaran"
-              className="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-px"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/90 text-slate-700 font-bold text-xs sm:text-sm transition-all shadow-xs"
             >
-              Daftar Sekarang
+              <Lock className="w-3.5 h-3.5 text-slate-500" />
+              <span>Pendaftaran Ditutup</span>
             </a>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -131,9 +132,10 @@ export default function Navbar() {
             <a
               href="#pendaftaran"
               onClick={handleNavClick}
-              className="mt-3 mx-0 flex items-center justify-center px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors"
+              className="mt-3 mx-0 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-sm transition-colors"
             >
-              Daftar Sekarang
+              <Lock className="w-4 h-4 text-slate-500" />
+              <span>Pendaftaran Ditutup</span>
             </a>
           </div>
         </div>

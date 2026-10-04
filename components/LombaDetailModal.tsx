@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ExternalLink,
   Music,
+  Lock,
 } from "lucide-react";
 
 export type Category = {
@@ -378,14 +379,20 @@ export default function LombaDetailModal({
         {/* Modal Footer CTA */}
         <div className="p-4 sm:p-6 bg-slate-50/90 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <div className="text-xs text-slate-500 text-center sm:text-left">
-            Kuota {lomba.kuota} • Pendaftaran ditutup bila kapasitas terpenuhi
+            Kuota {lomba.kuota} • Pendaftaran FAMUS 2026 telah resmi ditutup
           </div>
           <button
-            onClick={() => onSelectCategory(lomba.formValue)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm sm:text-base tracking-wide shadow-lg shadow-emerald-700/20 hover:shadow-xl hover:shadow-emerald-900/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+            onClick={() => {
+              onClose();
+              const el = document.getElementById("pendaftaran");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-sm sm:text-base tracking-wide shadow-md transition-all duration-300"
           >
-            <span>DAFTAR LOMBA INI</span>
-            <ArrowRight className="w-4 h-4 text-amber-300" />
+            <Lock className="w-4 h-4 text-amber-400" />
+            <span>PENDAFTARAN DITUTUP</span>
           </button>
         </div>
       </div>

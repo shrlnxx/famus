@@ -108,7 +108,7 @@ export default function Footer() {
                   href="#pendaftaran"
                   className="text-amber-400 hover:text-amber-300 transition-colors font-bold"
                 >
-                  Formulir Pendaftaran
+                  Info Pendaftaran (Ditutup)
                 </a>
               </li>
             </ul>

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CalendarDays, MapPin, Award, BookOpen, Volume2 } from "lucide-react";
+import { CalendarDays, MapPin, Award, BookOpen, Volume2, Lock } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -117,20 +117,21 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* 5. Primary CTA: DAFTAR SEKARANG → */}
+            {/* 5. Primary CTA: PENDAFTARAN DITUTUP */}
             <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
               <a
                 href="#pendaftaran"
                 id="hero-cta-daftar"
-                className="group inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-base tracking-wide shadow-lg shadow-emerald-700/25 hover:shadow-xl hover:shadow-emerald-900/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+                className="group inline-flex items-center justify-center gap-2.5 px-8 sm:px-9 py-4 rounded-full bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-base tracking-wide shadow-lg shadow-slate-900/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
               >
-                <span>DAFTAR SEKARANG</span>
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 text-amber-300 font-bold text-lg">
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>PENDAFTARAN DITUTUP</span>
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 text-amber-300 font-bold text-base">
                   &rarr;
                 </span>
               </a>
               <span className="text-xs text-slate-500 font-medium text-center sm:text-left self-center">
-                ✨ Kuota terbatas untuk tiap cabang lomba
+                ✨ Kuota telah terpenuhi • Sampai jumpa di FAMUS 2027!
               </span>
             </div>
           </div>
